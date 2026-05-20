@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ben GPT • New Cheeeat</title>
+  <title>Ben GPT • New thing</title>
   <style>
     :root {
       color-scheme: dark;
@@ -667,11 +667,20 @@
     function getBotReply(userText) {
       const crazy = Number(crazinessSlider.value) / 100;
       const lower = userText.toLowerCase();
+      // Special case: exact phrase (case-insensitive) triggers low-quality penguin video
+      if (lower === 'i just hit the jackpot') {
+        return {
+          text: 'You just hit the jackpot! Playing a low-quality penguin video...',
+          spam: false,
+          crazy,
+          special: 'penguin'
+        };
+      }
       const foundKeywords = wildWords.filter(word => lower.includes(word.toLowerCase()));
       const isSpam = Math.random() < 0.2;
 
       if (isSpam) {
-        const scream = crazy > 0.5 ? 'AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH!' : '';
+        const scream = crazy > 0.5 ? 'AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhHHHHHHHHHHHHHHHH!' : '';
         return {
           text: `${scream} ${Array.from({ length: 50 }, () => 'fuck you').join(' ')}`,
           spam: true,
@@ -744,6 +753,14 @@
       chatInput.value = '';
       const typingBubble = appendMessage('Ben GPT is typing...', 'bot');
       const reply = getBotReply(text);
+      // If the special penguin flag was returned, swap the corner video to the low-quality penguin
+      if (reply && reply.special === 'penguin') {
+        const corner = document.querySelector('.corner-video');
+        if (corner) {
+          corner.src = 'penguin-low.mp4';
+          corner.play && corner.play().catch(() => {});
+        }
+      }
       const typeSpeed = reply.spam ? Math.max(2, 10 - reply.crazy * 6) : Math.max(6, 20 - reply.crazy * 12);
 
       if (reply.spam) {
