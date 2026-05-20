@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ben GPT • New Chat</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: #060a14;
+      color: #eef2ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #07101f 0%, #070b17 100%);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      gap: 18px;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .topbar a {
+      color: #8fb7ff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .chat-window {
+      display: grid;
+      gap: 18px;
+      padding: 28px;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .message-list {
+      display: grid;
+      gap: 14px;
+      max-height: 62vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .message {
+      max-width: 86%;
+      padding: 20px 22px;
+      border-radius: 24px;
+      line-height: 1.7;
+      font-size: 0.98rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .message.user {
+      justify-self: end;
+      background: linear-gradient(135deg, rgba(79, 155, 255, 0.2), rgba(14, 212, 199, 0.12));
+      color: #eaf6ff;
+    }
+
+    .message.bot {
+      justify-self: start;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #dbe3ff;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.03);
+      color: #eef2ff;
+      padding: 18px 20px;
+      resize: vertical;
+      font: inherit;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: rgba(79, 155, 255, 0.7);
+      box-shadow: 0 0 0 4px rgba(79, 155, 255, 0.12);
+    }
+
+    .send-button {
+      border: 0;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #4f9bff, #0ed4c7);
+      color: #070b17;
+      padding: 0 28px;
+      font-weight: 700;
+      cursor: pointer;
+      min-width: 140px;
+    }
+
+    .meta {
+      display: grid;
+      gap: 6px;
+      color: #8c9cda;
+      font-size: 0.95rem;
+    }
+
+    .meta strong {
+      color: #f8fbff;
+    }
+
+    .site-header {
+      display: flex;
+      justify-content: center;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(6, 10, 20, 0.92);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(16px);
+    }
+
+    .header-inner {
+      width: min(1080px, 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      gap: 18px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      color: #dbe3ff;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 180ms ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a:focus-visible {
+      color: #4f9bff;
+    }
+
+    .site-footer {
+      margin-top: 24px;
+      color: #7d88b7;
+      font-size: 0.95rem;
+      text-align: center;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .try-ask {
+      display: grid;
+      gap: 10px;
+      padding: 18px 0 8px;
+      color: #c5d0ff;
+    }
+
+    .try-ask p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #a8b7ff;
+      letter-spacing: 0.01em;
+    }
+
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .suggestion-button {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      color: #eef2ff;
+      padding: 10px 14px;
+      border-radius: 16px;
+      cursor: pointer;
+      font: inherit;
+      transition: background 180ms ease, transform 180ms ease;
+    }
+
+    .suggestion-button:hover,
+    .suggestion-button:focus-visible {
+      background: rgba(79, 155, 255, 0.16);
+      transform: translateY(-1px);
+    }
+
+    .crazy-control {
+      display: grid;
+      gap: 10px;
+      padding: 18px 0 8px;
+      color: #c5d0ff;
+    }
+
+    .crazy-control label {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 0.95rem;
+      color: #a8b7ff;
+    }
+
+    .crazy-slider {
+      width: 100%;
+      appearance: none;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.15);
+      outline: none;
+    }
+
+    .crazy-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f9bff, #0ed4c7);
+      box-shadow: 0 0 10px rgba(79,155,255,0.35);
+      cursor: pointer;
+      border: none;
+    }
+
+    .crazy-slider::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f9bff, #0ed4c7);
+      border: none;
+      cursor: pointer;
+    }
+
+    .glitch-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      opacity: 0;
+      z-index: 9999;
+      background: repeating-linear-gradient(
+        180deg,
+        rgba(255,255,255,0.03),
+        rgba(255,255,255,0.03) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+      animation: glitchFade 0.2s ease-in-out infinite;
+    }
+
+    .corner-video {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      width: 220px;
+      max-width: 40vw;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
+      z-index: 10000;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    @media (max-width: 640px) {
+      .topbar,
+      .container { padding-left: 18px; padding-right: 18px; }
+      .input-row { grid-template-columns: 1fr; }
+      .send-button { width: 100%; min-width: 0; }
+      .message { max-width: 100%; }
+      .suggestion-button { flex: 1 1 100%; }
+      .corner-video {
+        left: 12px;
+        bottom: 12px;
+        width: 46vw;
+      }
+    }
+
+    .glitching .glitch-layer {
+      opacity: 0.65;
+      animation: glitchMove 0.08s steps(2) infinite;
+    }
+
+    body.glitching,
+    body.glitching .topbar,
+    body.glitching .chat-window,
+    body.glitching .message {
+      animation: shake 0.12s ease-in-out infinite;
+    }
+
+    body.glitching .message.bot {
+      color: #ff9bff;
+      border-color: rgba(255, 155, 255, 0.4);
+      box-shadow: 0 0 40px rgba(255, 155, 255, 0.25);
+    }
+
+    body.glitching .topbar,
+    body.glitching .chat-window {
+      filter: hue-rotate(15deg) contrast(1.1);
+    }
+
+    @keyframes glitchFade {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.75; }
+    }
+
+    @keyframes glitchMove {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(2px, -2px); }
+      60% { transform: translate(-3px, 1px); }
+      80% { transform: translate(1px, 3px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-1px, 1px); }
+      40% { transform: translate(1px, -1px); }
+      60% { transform: translate(-1px, -1px); }
+      80% { transform: translate(1px, 1px); }
+    }
+
+    @media (max-width: 640px) {
+      .topbar,
+      .container { padding-left: 18px; padding-right: 18px; }
+      .input-row { grid-template-columns: 1fr; }
+      .send-button { width: 100%; min-width: 0; }
+      .message { max-width: 100%; }
+      .suggestion-button { flex: 1 1 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div>
+        <p style="margin:0;color:#7b8aca;font-size:.88rem;letter-spacing:.08em;text-transform:uppercase;">Ben GPT</p>
+        <h1 style="margin:.35rem 0 0;">New Chat</h1>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="chat.html">Chat</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <section class="chat-window">
+      <div class="meta">
+        <span><strong>Started a fresh conversation.</strong> Type below and hit send to simulate a response.</span>
+      </div>
+      <div class="message-list" id="messageList">
+        <article class="message bot">Hi there! I’m Ben GPT and my brother Alex is nearby. Ask me anything to begin.</article>
+      </div>
+      <div class="input-row">
+        <textarea id="chatInput" placeholder="Type your message..." spellcheck="false"></textarea>
+        <button class="send-button" id="sendButton">Send</button>
+      </div>
+      <div class="try-ask">
+        <p>Try asking this:</p>
+        <div class="suggestions" id="suggestionList">
+          <button type="button" class="suggestion-button">Why is the Samsung Galaxy 10000000000 eating vegan meat?</button>
+          <button type="button" class="suggestion-button">What if a fart powered an astronaut spaceship?</button>
+          <button type="button" class="suggestion-button">How can diarrhea and Alzhimers make a rainbow story?</button>
+        </div>
+      </div>
+      <div class="crazy-control">
+        <label for="crazinessSlider">Craziness: <span id="crazinessValue">50%</span></label>
+        <input id="crazinessSlider" class="crazy-slider" type="range" min="0" max="100" value="50" />
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <p>Ben GPT • Chat page with a looping video and 100% craziness mode.</p>
+  </footer>
+  <div class="glitch-layer"></div>
+  <video class="corner-video" src="surfer.mp4" autoplay muted loop playsinline></video>
+  <audio id="crazinessAudio" loop style="display:none;"></audio>
+  <script>
+    const messageList = document.getElementById('messageList');
+    const chatInput = document.getElementById('chatInput');
+    const sendButton = document.getElementById('sendButton');
+    const suggestionList = document.getElementById('suggestionList');
+
+    const wildWords = [
+      'diarrhea',
+      'fart',
+      'meat',
+      'vegan',
+      'Samsung Galaxy 10000000000',
+      'alzhimers',
+      'zombie',
+      'unicorn',
+      'pizza',
+      'lava lamp',
+      'banana',
+      'astronaut',
+      'glitch',
+      'rainbow',
+      'spaghetti',
+      'jelly',
+      'ghost',
+      'octopus',
+      'volcano',
+      'robot',
+      'space taco',
+      'time machine',
+      'cactus',
+      'mushroom',
+      'hologram',
+      'neon nightmare',
+      'brain melt',
+      'electric vomit',
+      'psychowave',
+      'laser unicorn',
+      'screaming moon',
+      'eyeball pizza',
+      'quantum puke',
+      'chaos candy',
+      'horror disco'
+    ];
+
+    const coherentWords = {
+      nouns: [
+        'computer', 'dog', 'cat', 'mountain', 'ocean', 'forest', 'city', 'technology', 'science',
+        'music', 'art', 'book', 'movie', 'game', 'person', 'friend', 'family', 'home', 'world',
+        'dream', 'idea', 'thought', 'memory', 'time', 'space', 'energy', 'light', 'darkness',
+        'morning', 'night', 'day', 'year', 'moment', 'adventure', 'journey', 'question', 'answer',
+        'problem', 'solution', 'beginning', 'ending', 'hope', 'reality', 'mind', 'heart', 'soul',
+        'knowledge', 'wisdom', 'truth', 'beauty', 'mystery', 'wonder', 'joy', 'sadness', 'love',
+        'weather', 'sunset', 'sunrise', 'star', 'moon', 'planet', 'universe', 'galaxy', 'cosmos',
+        'flower', 'tree', 'river', 'lake', 'island', 'beach', 'cloud', 'wind', 'rain', 'snow',
+        'building', 'bridge', 'road', 'street', 'garden', 'park', 'school', 'library', 'museum',
+        'song', 'dance', 'painting', 'story', 'poem', 'recipe', 'meal', 'drink', 'dessert',
+        'adventure', 'challenge', 'chance', 'opportunity', 'possibility', 'potential', 'talent',
+        'skill', 'ability', 'strength', 'weakness', 'fear', 'courage', 'faith', 'trust', 'doubt',
+        'communication', 'conversation', 'dialogue', 'language', 'word', 'sentence', 'meaning',
+        'discovery', 'invention', 'creation', 'expression', 'emotion', 'feeling', 'sensation',
+        'experiment', 'theory', 'hypothesis', 'conclusion', 'evidence', 'fact', 'fiction',
+        'imagination', 'creativity', 'inspiration', 'motivation', 'determination', 'persistence',
+        'passion', 'curiosity', 'wonder', 'growth', 'change', 'evolution', 'progress', 'development',
+        'success', 'achievement', 'accomplishment', 'goal', 'vision', 'mission', 'purpose', 'meaning',
+        'connection', 'relationship', 'bond', 'friendship', 'community', 'culture', 'tradition',
+        'value', 'principle', 'ethic', 'belief', 'conviction', 'philosophy', 'perspective', 'view'
+      ],
+      verbs: [
+        'discover', 'explore', 'create', 'build', 'imagine', 'think', 'understand', 'learn',
+        'teach', 'help', 'inspire', 'motivate', 'challenge', 'solve', 'answer', 'ask', 'wonder',
+        'dream', 'hope', 'believe', 'trust', 'follow', 'lead', 'appreciate', 'enjoy', 'celebrate',
+        'develop', 'improve', 'advance', 'progress', 'evolve', 'transform', 'change',
+        'experience', 'encounter', 'observe', 'analyze', 'study', 'research', 'investigate',
+        'reveal', 'uncover', 'deepen', 'strengthen', 'grow', 'expand', 'extend', 'reach',
+        'connect', 'unite', 'share', 'communicate', 'express', 'describe', 'explain', 'clarify',
+        'produce', 'craft', 'design', 'plan', 'organize', 'arrange', 'coordinate', 'manage',
+        'persist', 'continue', 'maintain', 'preserve', 'protect', 'defend', 'support', 'encourage',
+        'consider', 'reflect', 'contemplate', 'ponder', 'meditate', 'absorb', 'embrace', 'accept',
+        'acknowledge', 'recognize', 'realize', 'perceive', 'sense', 'feel', 'respond', 'react',
+        'innovate', 'pioneer', 'pioneer', 'influence', 'inspire', 'encourage', 'empower', 'enable',
+        'achieve', 'accomplish', 'attain', 'obtain', 'acquire', 'gain', 'earn', 'merit',
+        'value', 'cherish', 'treasure', 'admire', 'respect', 'honor', 'praise', 'commend',
+        'imagine', 'visualize', 'envision', 'foresee', 'predict', 'anticipate', 'expect',
+        'begin', 'start', 'initiate', 'commence', 'launch', 'undertake', 'embark', 'venture',
+        'complete', 'finish', 'conclude', 'end', 'terminate', 'close', 'wrap', 'finalize'
+      ],
+      adjectives: [
+        'beautiful', 'amazing', 'wonderful', 'fantastic', 'incredible', 'extraordinary', 'unique',
+        'special', 'brilliant', 'intelligent', 'creative', 'innovative', 'original', 'excellent',
+        'outstanding', 'remarkable', 'impressive', 'profound', 'meaningful', 'interesting',
+        'fascinating', 'intriguing', 'captivating', 'inspiring', 'uplifting', 'powerful',
+        'strong', 'resilient', 'flexible', 'adaptable', 'persistent', 'determined', 'courageous',
+        'brave', 'confident', 'thoughtful', 'wise', 'kind', 'compassionate', 'empathetic',
+        'honest', 'sincere', 'genuine', 'authentic', 'true', 'real', 'tangible', 'concrete',
+        'simple', 'complex', 'sophisticated', 'elegant', 'graceful', 'harmonious', 'balanced',
+        'peaceful', 'calm', 'serene', 'tranquil', 'mysterious', 'unknown', 'hidden', 'secret',
+        'visible', 'bright', 'clear', 'vivid', 'vibrant', 'colorful', 'dynamic', 'energetic',
+        'active', 'lively', 'spirited', 'joyful', 'cheerful', 'happy', 'delighted', 'satisfied',
+        'curious', 'inquisitive', 'eager', 'keen', 'avid', 'passionate', 'devoted', 'dedicated',
+        'reliable', 'dependable', 'trustworthy', 'loyal', 'faithful', 'steadfast', 'constant',
+        'innovative', 'forward-thinking', 'progressive', 'modern', 'contemporary', 'current',
+        'thorough', 'comprehensive', 'detailed', 'meticulous', 'precise', 'exact', 'accurate',
+        'vast', 'grand', 'majestic', 'sublime', 'magnificent', 'glorious', 'splendid',
+        'subtle', 'delicate', 'gentle', 'soft', 'tender', 'mild', 'moderate', 'reasonable',
+        'vivacious', 'magnetic', 'charismatic', 'engaging', 'charming', 'delightful', 'pleasant'
+      ],
+      adverbs: [
+        'carefully', 'thoughtfully', 'genuinely', 'honestly', 'truly', 'certainly', 'absolutely',
+        'definitely', 'undoubtedly', 'clearly', 'obviously', 'evidently', 'apparently', 'seemingly',
+        'gradually', 'slowly', 'quickly', 'rapidly', 'constantly', 'continuously', 'persistently',
+        'patiently', 'diligently', 'meticulously', 'precisely', 'accurately', 'exactly', 'specifically',
+        'generally', 'essentially', 'fundamentally', 'ultimately', 'eventually', 'finally',
+        'beautifully', 'wonderfully', 'fantastically', 'incredibly', 'amazingly', 'remarkably',
+        'profoundly', 'deeply', 'thoroughly', 'completely', 'entirely', 'wholly', 'fully',
+        'readily', 'willingly', 'gladly', 'happily', 'joyfully', 'delightfully', 'pleasantly',
+        'effectively', 'efficiently', 'productively', 'successfully', 'triumphantly',
+        'steadily', 'firmly', 'solidly', 'stably', 'securely', 'safely', 'soundly',
+        'deliberately', 'intentionally', 'purposefully', 'consciously', 'knowingly', 'willfully'
+      ],
+      connectors: [
+        'because', 'therefore', 'thus', 'so', 'as a result', 'consequently', 'and', 'or', 'but',
+        'yet', 'however', 'although', 'while', 'if', 'when', 'where', 'after', 'before', 'during',
+        'since', 'until', 'unless', 'whereas', 'despite', 'furthermore', 'moreover', 'additionally',
+        'similarly', 'likewise', 'in contrast', 'on the other hand', 'as well as', 'also',
+        'indeed', 'in fact', 'notably', 'particularly', 'especially', 'specifically', 'namely'
+      ]
+    };
+
+    const extras = [
+      'and',
+      'is',
+      'that',
+      'eat',
+      'what',
+      'how',
+      'why',
+      'in',
+      'with',
+      'so',
+      'the',
+      'this',
+      'does',
+      'feel',
+      'like',
+      'can',
+      'when',
+      'where',
+      'would',
+      'must',
+      'about',
+      'through'
+    ];
+
+    const reactionTemplates = {
+      question: [
+        'When you ask %s it feels like the %s wants to eat a glitch in time.',
+        'What if the %s and the %s chase a banana through a neon rainbow?',
+        'How can %s be more than just a %s in a lava lamp carnival?',
+        'Why does %s sound like a ghost story about a space taco and an astronaut?'
+      ],
+      mention: [
+        'That %s was wild, and the %s made it even stranger in the story.',
+        'I can almost see %s and %s dancing around a volcano of ideas.',
+        'If %s is the beginning, then %s is the crazy ending tonight.',
+        'The mix of %s with %s feels like a turbocharged fairy tale full of neon.'
+      ],
+      generic: [
+        'One time a %s met a %s and the story turned into a beautiful disaster of words.',
+        'Sometimes the best answer is the one where %s, %s, and a robot go on a journey.',
+        'A dramatic %s with a %s can become a very long, very weird sentence full of texture.',
+        'Imagine %s dancing beside %s while the world asks why the Samsung Galaxy 10000000000 exists.'
+      ]
+    };
+
+    const suggestionButtons = Array.from(document.querySelectorAll('.suggestion-button'));
+    const crazinessSlider = document.getElementById('crazinessSlider');
+    const crazinessValue = document.getElementById('crazinessValue');
+    const crazinessAudio = document.getElementById('crazinessAudio');
+
+    function createCrazinessAudio() {
+      return 'house.mp3';
+    }
+
+    let audioGenerated = false;
+
+    function updateCrazinessDisplay() {
+      crazinessValue.textContent = `${crazinessSlider.value}%`;
+      const craziness = Number(crazinessSlider.value);
+
+      if (craziness === 100) {
+        if (!audioGenerated) {
+          try {
+            crazinessAudio.src = createCrazinessAudio();
+            crazinessAudio.load();
+            audioGenerated = true;
+          } catch (e) {
+            console.log('Audio loading failed:', e);
+          }
+        }
+        crazinessAudio.volume = 0.5;
+        crazinessAudio.play().catch(err => console.log('Playback failed:', err));
+      } else {
+        if (!crazinessAudio.paused) {
+          crazinessAudio.pause();
+        }
+      }
+    }
+
+    updateCrazinessDisplay();
+    crazinessSlider.addEventListener('input', updateCrazinessDisplay);
+
+    function getRandom(items) {
+      return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function buildCoherentReply(userText, crazy) {
+      const { nouns, verbs, adjectives, adverbs, connectors } = coherentWords;
+      const sentences = [];
+      const sentenceCount = 2 + Math.floor(Math.random() * 3);
+
+      for (let s = 0; s < sentenceCount; s += 1) {
+        const adjective = getRandom(adjectives);
+        const noun = getRandom(nouns);
+        const verb = getRandom(verbs);
+        const adverb = getRandom(adverbs);
+        const connector = getRandom(connectors);
+        const targetNoun = getRandom(nouns.filter(n => n !== noun));
+        const targetAdjective = getRandom(adjectives);
+
+        const templates = [
+          `That's a ${adjective} way to think about ${noun}. I find ${verb}ing about ${targetNoun} to be quite ${targetAdjective}.`,
+          `The ${adjective} thing about ${noun} is that we can ${verb} ${adverb}. ${connector.charAt(0).toUpperCase() + connector.slice(1)}, ${noun} and ${targetNoun} are ${targetAdjective}.`,
+          `I think it's ${adjective} how ${noun} can ${verb} so ${adverb}. When you consider ${targetNoun}, things become ${targetAdjective}.`,
+          `You know, ${noun} is ${adjective}, ${connector} ${verb}ing it ${adverb} takes effort. ${targetNoun} is ${targetAdjective} in comparison.`,
+          `${adjective.charAt(0).toUpperCase() + adjective.slice(1)} observation about ${noun}! I'd say we should ${verb} this ${adverb}. ${targetNoun} becomes ${targetAdjective} when we explore it further.`
+        ];
+        sentences.push(getRandom(templates));
+      }
+
+      return sentences.join(' ');
+    }
+
+    function buildLongReply(themeWords, crazy = 0.5) {
+      const maxExtra = Math.round(crazy * 8);
+      const count = 5 + Math.floor(Math.random() * 4) + maxExtra;
+      const phrases = [];
+      for (let i = 0; i < count; i += 1) {
+        const first = getRandom(themeWords);
+        const second = getRandom(wildWords.filter(w => w !== first));
+        const connector = getRandom(extras);
+        phrases.push(`${first} ${connector} ${second}`);
+      }
+      const trailing = crazy > 0.6 ? ` AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH!` : '';
+      return phrases.join(', ') + `.${trailing}`;
+    }
+
+    function getBotReply(userText) {
+      const crazy = Number(crazinessSlider.value) / 100;
+      const lower = userText.toLowerCase();
+      const foundKeywords = wildWords.filter(word => lower.includes(word.toLowerCase()));
+      const isSpam = Math.random() < 0.2;
+
+      if (isSpam) {
+        const scream = crazy > 0.5 ? 'AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH!' : '';
+        return {
+          text: `${scream} ${Array.from({ length: 50 }, () => 'fuck you').join(' ')}`,
+          spam: true,
+          crazy
+        };
+      }
+
+      if (crazy <= 0.1) {
+        return {
+          text: buildCoherentReply(userText, crazy),
+          spam: false,
+          crazy
+        };
+      }
+
+      let templateSet = reactionTemplates.generic;
+      if (/\b(what|how|why|when|where|who|does|is|can)\b/.test(lower)) {
+        templateSet = reactionTemplates.question;
+      } else if (foundKeywords.length > 0) {
+        templateSet = reactionTemplates.mention;
+      }
+
+      const firstWord = foundKeywords[0] || getRandom(wildWords);
+      const secondWord = foundKeywords[1] || getRandom(wildWords.filter(w => w !== firstWord));
+      const template = getRandom(templateSet);
+      const reply = template.replace('%s', firstWord).replace('%s', secondWord);
+      const longExtra = buildLongReply([firstWord, secondWord], crazy);
+      const scream = crazy > 0.6 ? 'AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH!' : '';
+      return {
+        text: `${scream} hehe okay tiny brain says: ${reply} ${longExtra}`,
+        spam: false,
+        crazy
+      };
+    }
+
+    function appendMessage(text, role) {
+      const message = document.createElement('article');
+      message.className = 'message ' + role;
+      message.textContent = text;
+      messageList.appendChild(message);
+      messageList.scrollTop = messageList.scrollHeight;
+      return message;
+    }
+
+    function typeReply(messageElement, text, speed = 18) {
+      let index = 0;
+      messageElement.textContent = '';
+      const interval = setInterval(() => {
+        messageElement.textContent += text[index] || '';
+        index += 1;
+        messageList.scrollTop = messageList.scrollHeight;
+        if (index >= text.length) {
+          clearInterval(interval);
+        }
+      }, speed);
+    }
+
+    function setGlitching(state) {
+      if (state) {
+        document.body.classList.add('glitching');
+      } else {
+        document.body.classList.remove('glitching');
+      }
+    }
+
+    function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      appendMessage(text, 'user');
+      chatInput.value = '';
+      const typingBubble = appendMessage('Ben GPT is typing...', 'bot');
+      const reply = getBotReply(text);
+      const typeSpeed = reply.spam ? Math.max(2, 10 - reply.crazy * 6) : Math.max(6, 20 - reply.crazy * 12);
+
+      if (reply.spam) {
+        setGlitching(true);
+        typingBubble.textContent = 'Ben GPT is yapping super loud...';
+      }
+
+      setTimeout(() => {
+        typeReply(typingBubble, reply.text, typeSpeed);
+        if (reply.spam) {
+          const glitchDuration = 6200 + (reply.crazy || 0.5) * 3200;
+          setTimeout(() => setGlitching(false), glitchDuration);
+        }
+      }, 700);
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+    suggestionButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        chatInput.value = button.textContent;
+        chatInput.focus();
+      });
+    });
+    chatInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
