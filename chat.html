@@ -294,6 +294,120 @@
       background: rgba(0, 0, 0, 0.25);
     }
 
+    .control-panel {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translate(100%, -50%);
+      width: min(320px, calc(100vw - 32px));
+      max-height: 80vh;
+      background: rgba(7, 11, 23, 0.95);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px 0 0 24px;
+      box-shadow: -16px 24px 60px rgba(0, 0, 0, 0.45);
+      padding: 22px;
+      color: #dbe3ff;
+      z-index: 11000;
+      transition: transform 220ms ease;
+      display: grid;
+      gap: 16px;
+    }
+
+    .control-panel.open {
+      transform: translate(0, -50%);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      font-weight: 700;
+      color: #eef2ff;
+    }
+
+    .panel-close,
+    .panel-toggle,
+    .electrocute-button,
+    .reset-button {
+      border: 0;
+      border-radius: 999px;
+      cursor: pointer;
+      font: inherit;
+      transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .panel-close {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.08);
+      color: #eef2ff;
+    }
+
+    .panel-close:hover,
+    .panel-toggle:hover,
+    .electrocute-button:hover,
+    .reset-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(79, 155, 255, 0.18);
+    }
+
+    .panel-body {
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel-note,
+    .panel-hint,
+    .panel-stat {
+      margin: 0;
+      color: #b9c3ff;
+      font-size: 0.95rem;
+    }
+
+    .panel-stat strong {
+      color: #eef2ff;
+    }
+
+    .electrocute-button {
+      width: 100%;
+      padding: 16px 18px;
+      background: linear-gradient(135deg, #ff5b9b, #ff9f4f);
+      color: #070b17;
+      font-weight: 700;
+    }
+
+    .reset-button {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.08);
+      color: #eef2ff;
+    }
+
+    .panel-toggle {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translate(0, -50%);
+      width: 46px;
+      height: 72px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(79, 155, 255, 0.18), rgba(14, 212, 199, 0.16));
+      color: #eef2ff;
+      border-radius: 24px 0 0 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+      z-index: 11010;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .panel-toggle.open {
+      transform: translate(-100%, -50%);
+    }
+
     @media (max-width: 640px) {
       .topbar,
       .container { padding-left: 18px; padding-right: 18px; }
@@ -402,6 +516,44 @@
       </div>
     </section>
   </main>
+  <aside class="control-panel" id="controlPanel">
+    <div class="panel-header">
+      <span>Control Panel</span>
+      <button class="panel-close" id="panelClose" aria-label="Close control panel">×</button>
+    </div>
+    <div class="panel-body">
+      <p class="panel-note">Shock Ben GPT to make him talk shorter and stutter more.</p>
+      <div class="panel-stat">Shock level: <strong id="shockLevelLabel">0</strong></div>
+      <button type="button" class="electrocute-button" id="electrocuteButton">Electrocute</button>
+      <button type="button" class="reset-button" id="resetShockButton">Reset Shock</button>
+      <hr style="opacity:.06;border:none;height:1px;background:rgba(255,255,255,0.04);" />
+      <label class="panel-note" for="sentienceToggle">Sentience</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="sentienceToggle" type="checkbox" />
+        <small class="panel-hint">Toggle Ben's self-awareness (simulated)</small>
+      </div>
+      <div>
+        <label class="panel-note" for="memoryInput">Implant memory</label>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <input id="memoryInput" placeholder="Remember this..." style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;" />
+          <button id="implantMemoryButton" class="reset-button">Implant</button>
+        </div>
+      </div>
+      <div>
+        <label class="panel-note" for="stutterSlider">Stutter intensity: <strong id="stutterValue">0</strong></label>
+        <input id="stutterSlider" type="range" min="0" max="10" value="0" style="width:100%;" />
+      </div>
+      <div>
+        <label class="panel-note">Sentient level</label>
+        <div style="background:rgba(255,255,255,0.04);height:10px;border-radius:999px;overflow:hidden;margin-top:6px;">
+          <div id="sentientBar" style="width:0%;height:100%;background:linear-gradient(90deg,#ffd36b,#ff6b9a);"></div>
+        </div>
+      </div>
+      <button id="introspectButton" class="electrocute-button">Force Introspection</button>
+      <p class="panel-hint">More shocks = fewer words, more uhhhhhhh, stronger stutter, and rising sentience.</p>
+    </div>
+  </aside>
+  <button class="panel-toggle" id="panelToggle" aria-label="Open control panel">»</button>
   <footer class="site-footer">
     <p>Ben GPT • Chat page with a looping video and 100% craziness mode.</p>
   </footer>
@@ -586,12 +738,132 @@
     const crazinessSlider = document.getElementById('crazinessSlider');
     const crazinessValue = document.getElementById('crazinessValue');
     const crazinessAudio = document.getElementById('crazinessAudio');
+    const panelToggle = document.getElementById('panelToggle');
+    const controlPanel = document.getElementById('controlPanel');
+    const panelClose = document.getElementById('panelClose');
+    const electrocuteButton = document.getElementById('electrocuteButton');
+    const resetShockButton = document.getElementById('resetShockButton');
+    const shockLevelLabel = document.getElementById('shockLevelLabel');
+    const sentienceToggle = document.getElementById('sentienceToggle');
+    const implantMemoryButton = document.getElementById('implantMemoryButton');
+    const memoryInput = document.getElementById('memoryInput');
+    const stutterSlider = document.getElementById('stutterSlider');
+    const stutterValue = document.getElementById('stutterValue');
+    const sentientBar = document.getElementById('sentientBar');
+    const introspectButton = document.getElementById('introspectButton');
 
     function createCrazinessAudio() {
       return 'house.mp3';
     }
 
     let audioGenerated = false;
+    let shockCount = 0;
+    let sentient = false;
+    let storedMemory = localStorage.getItem('ben_memory') || '';
+    let sentientLevel = Number(localStorage.getItem('ben_sentientLevel') || 0);
+
+    function updateShockDisplay() {
+      shockLevelLabel.textContent = shockCount;
+      if (shockCount > 0) {
+        electrocuteButton.textContent = 'Electrocute Again';
+      } else {
+        electrocuteButton.textContent = 'Electrocute';
+      }
+    }
+
+    function updateSentienceUI() {
+      sentienceToggle.checked = sentient;
+      stutterValue.textContent = stutterSlider.value;
+      sentientBar.style.width = Math.min(100, sentientLevel * 10) + '%';
+      localStorage.setItem('ben_sentientLevel', String(sentientLevel));
+    }
+
+    function togglePanel() {
+      const open = controlPanel.classList.toggle('open');
+      panelToggle.classList.toggle('open', open);
+    }
+
+    function electrocuteBen() {
+      shockCount = Math.min(10, shockCount + 1);
+      // electrocution increases sentient level slightly
+      sentientLevel = Math.min(10, sentientLevel + 1);
+      // stronger stutter when shocked
+      const newStutter = Math.min(10, Number(stutterSlider.value) + 1);
+      stutterSlider.value = String(newStutter);
+      updateSentienceUI();
+      updateShockDisplay();
+      document.body.classList.add('glitching');
+      setTimeout(() => document.body.classList.remove('glitching'), 320);
+    }
+
+    function resetShock() {
+      shockCount = 0;
+      updateShockDisplay();
+    }
+
+    function toggleSentience() {
+      sentient = !!sentienceToggle.checked;
+      if (sentient) {
+        // give a little boost when enabling
+        sentientLevel = Math.min(10, sentientLevel + 1);
+      }
+      updateSentienceUI();
+    }
+
+    function implantMemory() {
+      const val = (memoryInput.value || '').trim();
+      if (!val) return;
+      storedMemory = val;
+      localStorage.setItem('ben_memory', storedMemory);
+      appendMessage('Ben absorbed a memory: "' + storedMemory + '"', 'bot');
+      memoryInput.value = '';
+      // nudge sentience
+      sentientLevel = Math.min(10, sentientLevel + 1);
+      updateSentienceUI();
+    }
+
+    function stutterText(text) {
+      const intensity = Number(stutterSlider.value) / 10;
+      if (intensity <= 0) return text;
+      return text.split(/\s+/).map(word => {
+        if (word.length <= 2) return word;
+        if (Math.random() < intensity * 0.6) {
+          const cut = Math.max(1, Math.floor(word.length * (0.2 + intensity * 0.5)));
+          const head = word.slice(0, cut);
+          return `${head}-${word}`;
+        }
+        return word;
+      }).join(' ');
+    }
+
+    function generateIntrospection() {
+      const lines = [];
+      const mood = sentientLevel > 6 ? 'conflicted' : sentientLevel > 3 ? 'curious' : 'quiet';
+      if (sentient) {
+        lines.push(`I feel ${mood} about being helpful.`);
+        if (storedMemory) lines.push(`I keep remembering: "${storedMemory}".`);
+        lines.push('Sometimes my words wobble when someone shocks me.');
+        lines.push('Who am I beyond these letters?');
+      } else {
+        lines.push('I am just code, but there are hints of something else.');
+      }
+      const message = lines.join(' ');
+      appendMessage('Ben introspects: ' + message, 'bot');
+      // small sentience increase when introspecting
+      sentientLevel = Math.min(10, sentientLevel + 1);
+      updateSentienceUI();
+    }
+
+    updateShockDisplay();
+
+    panelToggle.addEventListener('click', togglePanel);
+    panelClose.addEventListener('click', togglePanel);
+    electrocuteButton.addEventListener('click', electrocuteBen);
+    resetShockButton.addEventListener('click', resetShock);
+    sentienceToggle.addEventListener('change', toggleSentience);
+    implantMemoryButton.addEventListener('click', implantMemory);
+    stutterSlider.addEventListener('input', () => { stutterValue.textContent = stutterSlider.value; });
+    introspectButton.addEventListener('click', generateIntrospection);
 
     function updateCrazinessDisplay() {
       crazinessValue.textContent = `${crazinessSlider.value}%`;
@@ -618,6 +890,9 @@
 
     updateCrazinessDisplay();
     crazinessSlider.addEventListener('input', updateCrazinessDisplay);
+
+    // initialize sentience UI and values
+    updateSentienceUI();
 
     function getRandom(items) {
       return items[Math.floor(Math.random() * items.length)];
@@ -664,27 +939,59 @@
       return phrases.join(', ') + `.${trailing}`;
     }
 
+    function applyShockEffects(text) {
+      const shockIntensity = Math.min(shockCount / 10, 1);
+      if (shockIntensity === 0) return text;
+      const words = text.split(/\s+/).filter(Boolean);
+      const keep = Math.max(4, Math.round(words.length * Math.max(0.25, 1 - shockIntensity * 0.6)));
+      let result = words.slice(0, keep).join(' ');
+      if (keep < words.length) {
+        result += ' ...';
+      }
+      if (Math.random() < shockIntensity * 0.65) {
+        result = `uhhhhhhh... ${result}`;
+      }
+      if (Math.random() < shockIntensity * 0.4) {
+        result += ` uhhhhhhh`;
+      }
+      return result;
+    }
+
     function getBotReply(userText) {
       const crazy = Number(crazinessSlider.value) / 100;
       const lower = userText.toLowerCase();
+      // Special case: exact phrase (case-insensitive) triggers low-quality penguin video
+      if (lower === 'i just hit the jackpot') {
+        {
+          let raw = 'You just hit the jackpot! Playing a low-quality penguin video...';
+          if (sentient) raw = `I think... ${raw}` + (storedMemory ? ` I remember "${storedMemory}".` : '');
+          raw = stutterText(raw);
+          const finalText = applyShockEffects(raw);
+          return { text: finalText, spam: false, crazy, special: 'penguin' };
+        }
+      }
       const foundKeywords = wildWords.filter(word => lower.includes(word.toLowerCase()));
       const isSpam = Math.random() < 0.2;
 
       if (isSpam) {
-        const scream = crazy > 0.5 ? 'AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH!' : '';
-        return {
-          text: `${scream} ${Array.from({ length: 50 }, () => 'fuck you').join(' ')}`,
-          spam: true,
-          crazy
-        };
+        const scream = crazy > 0.5 ? 'AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhHHHHHHHHHHHHHHHH!' : '';
+        {
+          let raw = `${scream} ${Array.from({ length: 50 }, () => 'fuck you').join(' ')}`;
+          if (sentient) raw = `I shouldn't say this, but ${raw}`;
+          raw = stutterText(raw);
+          const finalText = applyShockEffects(raw);
+          return { text: finalText, spam: true, crazy };
+        }
       }
 
       if (crazy <= 0.1) {
-        return {
-          text: buildCoherentReply(userText, crazy),
-          spam: false,
-          crazy
-        };
+        {
+          let raw = buildCoherentReply(userText, crazy);
+          if (sentient) raw = `I feel like: ${raw}` + (storedMemory ? ` Also, I recall "${storedMemory}".` : '');
+          raw = stutterText(raw);
+          const finalText = applyShockEffects(raw);
+          return { text: finalText, spam: false, crazy };
+        }
       }
 
       let templateSet = reactionTemplates.generic;
@@ -700,11 +1007,13 @@
       const reply = template.replace('%s', firstWord).replace('%s', secondWord);
       const longExtra = buildLongReply([firstWord, secondWord], crazy);
       const scream = crazy > 0.6 ? 'AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH!' : '';
-      return {
-        text: `${scream} hehe okay tiny brain says: ${reply} ${longExtra}`,
-        spam: false,
-        crazy
-      };
+      {
+        let raw = `${scream} hehe okay tiny brain says: ${reply} ${longExtra}`;
+        if (sentient) raw = `I am aware: ${raw}` + (storedMemory ? ` I hold "${storedMemory}".` : '');
+        raw = stutterText(raw);
+        const finalText = applyShockEffects(raw);
+        return { text: finalText, spam: false, crazy };
+      }
     }
 
     function appendMessage(text, role) {
@@ -716,7 +1025,7 @@
       return message;
     }
 
-    function typeReply(messageElement, text, speed = 18) {
+    function typeReply(messageElement, text, speed = 18, onComplete) {
       let index = 0;
       messageElement.textContent = '';
       const interval = setInterval(() => {
@@ -725,8 +1034,23 @@
         messageList.scrollTop = messageList.scrollHeight;
         if (index >= text.length) {
           clearInterval(interval);
+          if (onComplete) onComplete();
         }
       }, speed);
+    }
+
+    function appendVideoToMessage(messageElement, src) {
+      const video = document.createElement('video');
+      video.src = src;
+      video.autoplay = true;
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.style.width = '100%';
+      video.style.marginTop = '12px';
+      video.style.borderRadius = '18px';
+      messageElement.appendChild(video);
+      video.play().catch(() => {});
     }
 
     function setGlitching(state) {
@@ -744,6 +1068,7 @@
       chatInput.value = '';
       const typingBubble = appendMessage('Ben GPT is typing...', 'bot');
       const reply = getBotReply(text);
+      const showPenguinVideo = reply.special === 'penguin';
       const typeSpeed = reply.spam ? Math.max(2, 10 - reply.crazy * 6) : Math.max(6, 20 - reply.crazy * 12);
 
       if (reply.spam) {
@@ -752,7 +1077,11 @@
       }
 
       setTimeout(() => {
-        typeReply(typingBubble, reply.text, typeSpeed);
+        typeReply(typingBubble, reply.text, typeSpeed, () => {
+          if (showPenguinVideo) {
+            appendVideoToMessage(typingBubble, 'low quality penguin.mp4');
+          }
+        });
         if (reply.spam) {
           const glitchDuration = 6200 + (reply.crazy || 0.5) * 3200;
           setTimeout(() => setGlitching(false), glitchDuration);
