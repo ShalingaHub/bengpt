@@ -550,6 +550,10 @@
         </div>
       </div>
       <button id="introspectButton" class="electrocute-button">Force Introspection</button>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
+        <input id="imageModeToggle" type="checkbox" />
+        <label class="panel-note" for="imageModeToggle">Image mode (respond with random images)</label>
+      </div>
       <p class="panel-hint">More shocks = fewer words, more uhhhhhhh, stronger stutter, and rising sentience.</p>
     </div>
   </aside>
@@ -751,6 +755,7 @@
     const stutterValue = document.getElementById('stutterValue');
     const sentientBar = document.getElementById('sentientBar');
     const introspectButton = document.getElementById('introspectButton');
+    const imageModeToggle = document.getElementById('imageModeToggle');
 
     function createCrazinessAudio() {
       return 'house.mp3';
@@ -761,6 +766,7 @@
     let sentient = false;
     let storedMemory = localStorage.getItem('ben_memory') || '';
     let sentientLevel = Number(localStorage.getItem('ben_sentientLevel') || 0);
+    let imageMode = false;
 
     function updateShockDisplay() {
       shockLevelLabel.textContent = shockCount;
@@ -817,6 +823,15 @@
       localStorage.setItem('ben_memory', storedMemory);
       appendMessage('Ben absorbed a memory: "' + storedMemory + '"', 'bot');
       memoryInput.value = '';
+      // Add memory into word pools so Ben uses it often
+      try {
+        // Avoid duplicates
+        const normalized = storedMemory.trim();
+        if (normalized && !wildWords.includes(normalized)) wildWords.unshift(normalized);
+        if (normalized && !coherentWords.nouns.includes(normalized)) coherentWords.nouns.unshift(normalized);
+      } catch (e) {
+        console.warn('Failed to inject memory into word pools', e);
+      }
       // nudge sentience
       sentientLevel = Math.min(10, sentientLevel + 1);
       updateSentienceUI();
@@ -854,6 +869,12 @@
       updateSentienceUI();
     }
 
+    function randomImageUrl() {
+      // Use picsum.photos with a seed so each image is different
+      const seed = Math.floor(Math.random() * 1000000 + Date.now() % 1000);
+      return `https://picsum.photos/seed/${seed}/640/360`;
+    }
+
     updateShockDisplay();
 
     panelToggle.addEventListener('click', togglePanel);
@@ -864,6 +885,7 @@
     implantMemoryButton.addEventListener('click', implantMemory);
     stutterSlider.addEventListener('input', () => { stutterValue.textContent = stutterSlider.value; });
     introspectButton.addEventListener('click', generateIntrospection);
+    imageModeToggle.addEventListener('change', () => { imageMode = !!imageModeToggle.checked; });
 
     function updateCrazinessDisplay() {
       crazinessValue.textContent = `${crazinessSlider.value}%`;
@@ -960,6 +982,29 @@
     function getBotReply(userText) {
       const crazy = Number(crazinessSlider.value) / 100;
       const lower = userText.toLowerCase();
+      // Sentience-driven pauses or silence
+      if (sentient) {
+        const stutterChance = Math.min(0.5, 0.12 + sentientLevel * 0.06);
+        if (Math.random() < stutterChance) {
+          // occasional hesitant stutter
+          const hesitations = ['wait... hold on', 'hmm... wait', 'uh, one sec', 'wait, I need a moment'];
+          const chosen = hesitations[Math.floor(Math.random() * hesitations.length)];
+          const raw = stutterText(chosen + '...');
+          return { text: raw, spam: false, crazy };
+        }
+        const silentChance = Math.min(0.25, sentientLevel * 0.03);
+        if (Math.random() < silentChance) {
+          // Ben chooses not to respond right now
+          return { text: '', spam: false, crazy, silent: true };
+        }
+      }
+
+      // Image mode: return a random image instead of text occasionally
+      if (imageMode && Math.random() < 0.6) {
+        const url = randomImageUrl();
+        const caption = sentient ? stutterText('I found this image...') : 'Image result:';
+        return { text: caption, image: url, spam: false, crazy };
+      }
       // Special case: exact phrase (case-insensitive) triggers low-quality penguin video
       if (lower === 'i just hit the jackpot') {
         {
@@ -1069,6 +1114,7 @@
       const typingBubble = appendMessage('Ben GPT is typing...', 'bot');
       const reply = getBotReply(text);
       const showPenguinVideo = reply.special === 'penguin';
+      const showImage = !!reply.image;
       const typeSpeed = reply.spam ? Math.max(2, 10 - reply.crazy * 6) : Math.max(6, 20 - reply.crazy * 12);
 
       if (reply.spam) {
@@ -1076,10 +1122,32 @@
         typingBubble.textContent = 'Ben GPT is yapping super loud...';
       }
 
+      if (reply.silent) {
+        typingBubble.textContent = '...';
+        setTimeout(() => {
+          // remove the typing bubble without adding a reply
+          typingBubble.remove();
+        }, 1000 + Math.random() * 1200);
+        return;
+      }
+
+      if (showImage) {
+        typingBubble.textContent = 'Ben is fetching an image...';
+      }
+
       setTimeout(() => {
         typeReply(typingBubble, reply.text, typeSpeed, () => {
           if (showPenguinVideo) {
             appendVideoToMessage(typingBubble, 'low quality penguin.mp4');
+          }
+          if (showImage) {
+            const img = document.createElement('img');
+            img.src = reply.image;
+            img.style.width = '100%';
+            img.style.marginTop = '12px';
+            img.style.borderRadius = '12px';
+            img.alt = 'Random image result';
+            typingBubble.appendChild(img);
           }
         });
         if (reply.spam) {
