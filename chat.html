@@ -811,6 +811,21 @@
   <div class="glitch-layer"></div>
   <video class="corner-video" src="surfer.mp4" autoplay muted loop playsinline></video>
   <audio id="crazinessAudio" loop style="display:none;"></audio>
+  <video
+    id="awShucksVideo"
+    style="
+      display:none;
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      width:min(700px,90vw);
+      z-index:20000;
+      border-radius:20px;
+      box-shadow:0 0 50px rgba(0,0,0,.7);
+    "
+    playsinline
+  ></video>
   <div class="achievements-panel" id="achievementsPanel">
     <div class="achievements-header">
       <span>🏆 Achievements</span>
@@ -1612,6 +1627,13 @@
     function getBotReply(userText) {
       const crazy = Number(crazinessSlider.value) / 100;
       const lower = userText.toLowerCase();
+
+      if (lower.includes('aw shucks')) {
+        return {
+          text: 'aw shucks...',
+          special: 'awshucks'
+        };
+      }
       // Sentience-driven pauses or silence
       if (sentient) {
         const stutterChance = Math.min(0.5, 0.12 + sentientLevel * 0.06);
