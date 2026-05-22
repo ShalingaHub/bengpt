@@ -92,6 +92,56 @@
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 14px;
+      position: relative;
+    }
+
+    .combo-counter {
+      position: absolute;
+      right: 150px;
+      top: -32px;
+      background: linear-gradient(135deg, rgba(255, 107, 154, 0.2), rgba(255, 215, 107, 0.2));
+      border: 1px solid rgba(255, 215, 107, 0.3);
+      border-radius: 12px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #ffd76b;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+    }
+
+    .combo-counter.active {
+      opacity: 1;
+    }
+
+    .fun-fact {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 215, 107, 0.1);
+      border: 1px solid rgba(255, 215, 107, 0.2);
+      border-radius: 12px;
+      padding: 10px 16px;
+      color: #ffd76b;
+      font-size: 0.85rem;
+      font-weight: 600;
+      max-width: 400px;
+      text-align: center;
+      z-index: 15000;
+      animation: slideDown 0.4s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateX(-50%) translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
     }
 
     textarea {
@@ -278,6 +328,202 @@
         transparent 3px
       );
       animation: glitchFade 0.2s ease-in-out infinite;
+    }
+
+    .achievement-popup {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: linear-gradient(135deg, rgba(255, 215, 107, 0.15), rgba(255, 107, 154, 0.15));
+      border: 2px solid rgba(255, 215, 107, 0.4);
+      border-radius: 16px;
+      padding: 18px 22px;
+      color: #ffd76b;
+      font-weight: 700;
+      box-shadow: 0 16px 48px rgba(255, 215, 107, 0.25);
+      z-index: 12000;
+      max-width: 320px;
+      animation: slideUp 0.4s ease-out, slideOut 0.4s ease-in 2.6s forwards;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .achievement-popup::before {
+      content: '🏆';
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .achievement-icon {
+      flex-shrink: 0;
+      font-size: 1.5rem;
+    }
+
+    .achievements-panel {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      width: min(400px, 100vw);
+      max-height: 70vh;
+      background: rgba(7, 11, 23, 0.98);
+      border: 1px solid rgba(255, 215, 107, 0.2);
+      border-radius: 24px 24px 0 0;
+      box-shadow: -16px -24px 60px rgba(0, 0, 0, 0.45);
+      padding: 22px;
+      color: #dbe3ff;
+      z-index: 11500;
+      transform: translateY(100%);
+      transition: transform 220ms ease;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .achievements-panel.open {
+      transform: translateY(0);
+    }
+
+    .achievements-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      font-weight: 700;
+      color: #ffd76b;
+      border-bottom: 1px solid rgba(255, 215, 107, 0.2);
+      padding-bottom: 12px;
+    }
+
+    .achievements-list {
+      display: grid;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    .achievement-item {
+      background: rgba(255, 215, 107, 0.08);
+      border: 1px solid rgba(255, 215, 107, 0.12);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .achievement-item.locked {
+      opacity: 0.5;
+      border-color: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .achievement-item.locked .achievement-emoji {
+      filter: grayscale(100%);
+    }
+
+    .achievement-emoji {
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .achievement-info {
+      flex: 1;
+    }
+
+    .achievement-name {
+      font-weight: 700;
+      color: #ffd76b;
+      font-size: 0.95rem;
+    }
+
+    .achievement-desc {
+      color: #a8b7ff;
+      font-size: 0.85rem;
+      margin-top: 2px;
+    }
+
+    .achievement-progress {
+      color: #7d88b7;
+      font-size: 0.8rem;
+      margin-top: 4px;
+    }
+
+    .achievements-toggle {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #ffd76b, #ff6b9a);
+      border: none;
+      color: #070b17;
+      font-size: 1.6rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 12px 32px rgba(255, 215, 107, 0.35);
+      transition: transform 180ms ease, box-shadow 180ms ease;
+      z-index: 11400;
+    }
+
+    .achievements-toggle:hover {
+      transform: scale(1.08);
+      box-shadow: 0 16px 48px rgba(255, 215, 107, 0.45);
+    }
+
+    .achievements-toggle.has-new {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(120%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(120%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+
+    @keyframes celebrate {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-80px) scale(0.8);
+        opacity: 0;
+      }
+    }
+
+    .celebration-emoji {
+      position: fixed;
+      font-size: 2rem;
+      pointer-events: none;
+      z-index: 12001;
+      animation: celebrate 1.2s ease-out forwards;
     }
 
     .corner-video {
@@ -501,6 +747,7 @@
       <div class="input-row">
         <textarea id="chatInput" placeholder="Type your message..." spellcheck="false"></textarea>
         <button class="send-button" id="sendButton">Send</button>
+        <div class="combo-counter" id="comboCounter"></div>
       </div>
       <div class="try-ask">
         <p>Try asking this:</p>
@@ -564,8 +811,354 @@
   <div class="glitch-layer"></div>
   <video class="corner-video" src="surfer.mp4" autoplay muted loop playsinline></video>
   <audio id="crazinessAudio" loop style="display:none;"></audio>
+  <div class="achievements-panel" id="achievementsPanel">
+    <div class="achievements-header">
+      <span>🏆 Achievements</span>
+      <button class="panel-close" id="achievementsClose" aria-label="Close achievements">×</button>
+    </div>
+    <div class="achievements-list" id="achievementsList"></div>
+  </div>
+  <button class="achievements-toggle" id="achievementsToggle" aria-label="Open achievements">🏆</button>
   <script>
-    const messageList = document.getElementById('messageList');
+    // ===== ACHIEVEMENT SYSTEM =====
+    const ACHIEVEMENTS = {
+      // Chat achievements
+      first_message: {
+        name: 'First Words',
+        emoji: '💬',
+        desc: 'Send your first message',
+        condition: () => stats.messagesCount >= 1,
+        progress: () => `${stats.messagesCount} / 1`,
+        group: 'chat'
+      },
+      chat_master: {
+        name: 'Chat Master',
+        emoji: '🗣️',
+        desc: 'Send 25 messages',
+        condition: () => stats.messagesCount >= 25,
+        progress: () => `${stats.messagesCount} / 25`,
+        group: 'chat'
+      },
+      conversation_legend: {
+        name: 'Conversation Legend',
+        emoji: '📚',
+        desc: 'Send 100 messages',
+        condition: () => stats.messagesCount >= 100,
+        progress: () => `${stats.messagesCount} / 100`,
+        group: 'chat'
+      },
+      wildcard_master: {
+        name: 'Wildcard Master',
+        emoji: '🎲',
+        desc: 'Use a wild word in your message (diarrhea, fart, zombie, etc.)',
+        condition: () => stats.wildcardsUsed >= 1,
+        progress: () => `${stats.wildcardsUsed} / 1`,
+        group: 'chat'
+      },
+      question_asker: {
+        name: 'Question Asker',
+        emoji: '❓',
+        desc: 'Ask 10 questions',
+        condition: () => stats.questionsAsked >= 10,
+        progress: () => `${stats.questionsAsked} / 10`,
+        group: 'chat'
+      },
+      crazy_mode_user: {
+        name: 'Craziness Enjoyer',
+        emoji: '🌀',
+        desc: 'Set craziness to 100%',
+        condition: () => stats.max_craziness >= 100,
+        progress: () => `Max: ${stats.max_craziness}%`,
+        group: 'chat'
+      },
+      long_message: {
+        name: 'Novel Writer',
+        emoji: '📖',
+        desc: 'Send a message with over 100 characters',
+        condition: () => stats.longMessageSent,
+        progress: () => stats.longMessageSent ? '✓' : '—',
+        group: 'chat'
+      },
+
+      // Electrocute achievements
+      first_shock: {
+        name: 'Zapper',
+        emoji: '⚡',
+        desc: 'Electrocute Ben GPT once',
+        condition: () => stats.shockCount >= 1,
+        progress: () => `${stats.shockCount} / 1`,
+        group: 'shock'
+      },
+      serial_shocker: {
+        name: 'Serial Shocker',
+        emoji: '🔌',
+        desc: 'Electrocute Ben GPT 5 times',
+        condition: () => stats.shockCount >= 5,
+        progress: () => `${stats.shockCount} / 5`,
+        group: 'shock'
+      },
+      max_electrocute: {
+        name: 'Mad Scientist',
+        emoji: '⚡⚡⚡',
+        desc: 'Reach maximum shock level (10)',
+        condition: () => stats.shockCount >= 10,
+        progress: () => `${stats.shockCount} / 10`,
+        group: 'shock'
+      },
+      stutter_addict: {
+        name: 'Stutter Addict',
+        emoji: '🤨',
+        desc: 'Increase stutter intensity to 5',
+        condition: () => stats.maxStutter >= 5,
+        progress: () => `${stats.maxStutter} / 5`,
+        group: 'shock'
+      },
+      sentience_seeker: {
+        name: 'Sentience Seeker',
+        emoji: '🧠',
+        desc: 'Enable Ben\'s sentience',
+        condition: () => stats.sentientEnabled,
+        progress: () => stats.sentientEnabled ? '✓' : '—',
+        group: 'shock'
+      },
+      memory_implanter: {
+        name: 'Memory Implanter',
+        emoji: '💾',
+        desc: 'Implant a memory into Ben\'s mind',
+        condition: () => stats.memoriesImplanted >= 1,
+        progress: () => `${stats.memoriesImplanted} / 1`,
+        group: 'shock'
+      },
+      introspection_master: {
+        name: 'Philosopher',
+        emoji: '🤔',
+        desc: 'Force Ben to introspect 3 times',
+        condition: () => stats.introspections >= 3,
+        progress: () => `${stats.introspections} / 3`,
+        group: 'shock'
+      },
+
+      // Fun achievements
+      penguin_watcher: {
+        name: 'Penguin Watcher',
+        emoji: '🐧',
+        desc: 'Watch the penguin video (say "i just hit the jackpot")',
+        condition: () => stats.penguinWatched,
+        progress: () => stats.penguinWatched ? '✓' : '—',
+        group: 'fun'
+      },
+      image_explorer: {
+        name: 'Image Explorer',
+        emoji: '🖼️',
+        desc: 'Enable image mode and get an image response',
+        condition: () => stats.imagesReceived >= 1,
+        progress: () => `${stats.imagesReceived} / 1`,
+        group: 'fun'
+      },
+      spam_listener: {
+        name: 'Spam Listener',
+        emoji: '🔊',
+        desc: 'Hear Ben spam the same phrase',
+        condition: () => stats.spamReceived >= 1,
+        progress: () => `${stats.spamReceived} / 1`,
+        group: 'fun'
+      },
+      response_collector: {
+        name: 'Response Collector',
+        emoji: '🎯',
+        desc: 'Receive 50 responses from Ben',
+        condition: () => stats.responsesReceived >= 50,
+        progress: () => `${stats.responsesReceived} / 50`,
+        group: 'fun'
+      },
+      combo_master: {
+        name: 'Combo Master',
+        emoji: '💥',
+        desc: 'Send 5 messages in a row without resetting',
+        condition: () => stats.maxCombo >= 5,
+        progress: () => `Max: ${stats.maxCombo}`,
+        group: 'fun'
+      },
+      all_wild_words: {
+        name: 'Dictionary Master',
+        emoji: '📕',
+        desc: 'Use 20 different wild words in messages',
+        condition: () => stats.uniqueWildcards >= 20,
+        progress: () => `${stats.uniqueWildcards} / 20`,
+        group: 'fun'
+      }
+    };
+
+    let stats = {
+      messagesCount: 0,
+      wildcardsUsed: 0,
+      questionsAsked: 0,
+      max_craziness: 0,
+      longMessageSent: false,
+      shockCount: 0,
+      maxStutter: 0,
+      sentientEnabled: false,
+      memoriesImplanted: 0,
+      introspections: 0,
+      penguinWatched: false,
+      imagesReceived: 0,
+      spamReceived: 0,
+      responsesReceived: 0,
+      maxCombo: 0,
+      currentCombo: 0,
+      uniqueWildcards: new Set(),
+      unlockedAchievements: new Set()
+    };
+
+    function loadStats() {
+      const saved = localStorage.getItem('bengpt_stats');
+      if (saved) {
+        const data = JSON.parse(saved);
+        Object.assign(stats, data);
+        if (data.uniqueWildcards) {
+          stats.uniqueWildcards = new Set(data.uniqueWildcards);
+        }
+        if (data.unlockedAchievements) {
+          stats.unlockedAchievements = new Set(data.unlockedAchievements);
+        }
+      }
+    }
+
+    function saveStats() {
+      const data = { ...stats };
+      data.uniqueWildcards = Array.from(stats.uniqueWildcards);
+      data.unlockedAchievements = Array.from(stats.unlockedAchievements);
+      localStorage.setItem('bengpt_stats', JSON.stringify(data));
+    }
+
+    function showAchievementPopup(achievement) {
+      const popup = document.createElement('div');
+      popup.className = 'achievement-popup';
+      popup.innerHTML = `<div class="achievement-icon">${achievement.emoji}</div><div><strong>${achievement.name}</strong><br><span style="font-size:.85rem;opacity:.8;">${achievement.desc}</span></div>`;
+      document.body.appendChild(popup);
+      
+      // Add celebration emojis
+      const celebrationEmojis = ['🎉', '✨', '🌟', '💫', '🎊'];
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          const emoji = document.createElement('div');
+          emoji.className = 'celebration-emoji';
+          emoji.textContent = celebrationEmojis[Math.floor(Math.random() * celebrationEmojis.length)];
+          emoji.style.left = (Math.random() * 60 - 30) + 'vw';
+          emoji.style.bottom = '0';
+          document.body.appendChild(emoji);
+          setTimeout(() => emoji.remove(), 1200);
+        }, i * 100);
+      }
+      
+      setTimeout(() => popup.remove(), 3000);
+    }
+
+    function checkAndUnlockAchievements() {
+      let anyUnlocked = false;
+      Object.entries(ACHIEVEMENTS).forEach(([key, achievement]) => {
+        if (!stats.unlockedAchievements.has(key) && achievement.condition()) {
+          stats.unlockedAchievements.add(key);
+          showAchievementPopup(achievement);
+          anyUnlocked = true;
+        }
+      });
+      if (anyUnlocked) {
+        saveStats();
+        updateAchievementsUI();
+      }
+    }
+
+    function updateAchievementsUI() {
+      const list = document.getElementById('achievementsList');
+      list.innerHTML = '';
+      
+      const groups = {
+        chat: [],
+        shock: [],
+        fun: []
+      };
+
+      Object.entries(ACHIEVEMENTS).forEach(([key, achievement]) => {
+        const isUnlocked = stats.unlockedAchievements.has(key);
+        const item = document.createElement('div');
+        item.className = `achievement-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+        item.innerHTML = `
+          <div class="achievement-emoji">${achievement.emoji}</div>
+          <div class="achievement-info">
+            <div class="achievement-name">${achievement.name}</div>
+            <div class="achievement-desc">${achievement.desc}</div>
+            <div class="achievement-progress">${achievement.progress()}</div>
+          </div>
+        `;
+        groups[achievement.group].push(item);
+      });
+
+      const groupLabels = { chat: '💬 Chat', shock: '⚡ Electrocute', fun: '🎉 Fun' };
+      Object.entries(groups).forEach(([group, items]) => {
+        if (items.length > 0) {
+          const label = document.createElement('div');
+          label.style.cssText = 'font-weight:700;color:#a8b7ff;margin-top:12px;font-size:.9rem;';
+          label.textContent = groupLabels[group];
+          list.appendChild(label);
+          items.forEach(item => list.appendChild(item));
+        }
+      });
+    }
+
+    const achievementsPanel = document.getElementById('achievementsPanel');
+    const achievementsToggle = document.getElementById('achievementsToggle');
+    const achievementsClose = document.getElementById('achievementsClose');
+
+    achievementsToggle.addEventListener('click', () => {
+      const isOpen = achievementsPanel.classList.toggle('open');
+      if (isOpen) achievementsToggle.classList.remove('has-new');
+    });
+
+    achievementsClose.addEventListener('click', () => {
+      achievementsPanel.classList.remove('open');
+    });
+
+    const comboCounter = document.getElementById('comboCounter');
+
+    const funFacts = [
+      '🎲 Every 5 messages in a row is a COMBO!',
+      '⚡ Electrocute Ben to unlock shock achievements!',
+      '🧠 Enable sentience for philosophical responses!',
+      '💾 Implant memories to change how Ben talks!',
+      '🐧 Say "i just hit the jackpot" for a surprise!',
+      '🌀 Turn craziness to 100% for chaos mode!',
+      '🎯 Use wild words to trigger wild responses!',
+      '❓ Ask questions to unlock the Question Asker!',
+      '🔊 Enable image mode to get random pictures!',
+      '💬 Keep chatting to become a Chat Master!',
+      '🤔 Force introspection to make Ben think!',
+      '📖 Write long messages for achievements!',
+      '🏆 Check your achievements panel on the right!',
+      '⚡⚡⚡ Maximum shock level is 10!',
+      '😈 The spam responses are pure chaos!',
+      '✨ Every achievement has a hidden purpose...',
+      '🌈 Try different combinations for new results!',
+      '🎪 Ben is watching... can he think for real?'
+    ];
+
+    function showFunFact() {
+      const fact = funFacts[Math.floor(Math.random() * funFacts.length)];
+      const factDiv = document.createElement('div');
+      factDiv.className = 'fun-fact';
+      factDiv.textContent = fact;
+      document.body.appendChild(factDiv);
+      setTimeout(() => factDiv.remove(), 4000);
+    }
+
+    function updateComboDisplay() {
+      if (stats.currentCombo >= 5) {
+        comboCounter.classList.add('active');
+        comboCounter.textContent = `🔥 COMBO x${stats.currentCombo}`;
+      } else {
+        comboCounter.classList.remove('active');
+      }
+    }
     const chatInput = document.getElementById('chatInput');
     const sendButton = document.getElementById('sendButton');
     const suggestionList = document.getElementById('suggestionList');
@@ -796,14 +1389,24 @@
       // stronger stutter when shocked
       const newStutter = Math.min(10, Number(stutterSlider.value) + 1);
       stutterSlider.value = String(newStutter);
+      
+      // Track stats
+      stats.shockCount = shockCount;
+      stats.maxStutter = Math.max(stats.maxStutter, Number(stutterSlider.value));
+      saveStats();
+      
       updateSentienceUI();
       updateShockDisplay();
+      checkAndUnlockAchievements();
+      
       document.body.classList.add('glitching');
       setTimeout(() => document.body.classList.remove('glitching'), 320);
     }
 
     function resetShock() {
       shockCount = 0;
+      stats.currentCombo = 0;
+      updateComboDisplay();
       updateShockDisplay();
     }
 
@@ -812,6 +1415,9 @@
       if (sentient) {
         // give a little boost when enabling
         sentientLevel = Math.min(10, sentientLevel + 1);
+        stats.sentientEnabled = true;
+        saveStats();
+        checkAndUnlockAchievements();
       }
       updateSentienceUI();
     }
@@ -834,7 +1440,13 @@
       }
       // nudge sentience
       sentientLevel = Math.min(10, sentientLevel + 1);
+      
+      // Track stats
+      stats.memoriesImplanted++;
+      saveStats();
+      
       updateSentienceUI();
+      checkAndUnlockAchievements();
     }
 
     function stutterText(text) {
@@ -864,9 +1476,15 @@
       }
       const message = lines.join(' ');
       appendMessage('Ben introspects: ' + message, 'bot');
+      
+      // Track stats
+      stats.introspections++;
+      saveStats();
+      
       // small sentience increase when introspecting
       sentientLevel = Math.min(10, sentientLevel + 1);
       updateSentienceUI();
+      checkAndUnlockAchievements();
     }
 
     function randomImageUrl() {
@@ -883,13 +1501,25 @@
     resetShockButton.addEventListener('click', resetShock);
     sentienceToggle.addEventListener('change', toggleSentience);
     implantMemoryButton.addEventListener('click', implantMemory);
-    stutterSlider.addEventListener('input', () => { stutterValue.textContent = stutterSlider.value; });
+    stutterSlider.addEventListener('input', () => { 
+      stutterValue.textContent = stutterSlider.value;
+      stats.maxStutter = Math.max(stats.maxStutter, Number(stutterSlider.value));
+      saveStats();
+      checkAndUnlockAchievements();
+    });
     introspectButton.addEventListener('click', generateIntrospection);
     imageModeToggle.addEventListener('change', () => { imageMode = !!imageModeToggle.checked; });
 
     function updateCrazinessDisplay() {
       crazinessValue.textContent = `${crazinessSlider.value}%`;
       const craziness = Number(crazinessSlider.value);
+
+      // Track stats
+      if (craziness > stats.max_craziness) {
+        stats.max_craziness = craziness;
+        saveStats();
+        checkAndUnlockAchievements();
+      }
 
       if (craziness === 100) {
         if (!audioGenerated) {
@@ -1109,7 +1739,50 @@
     function sendMessage() {
       const text = chatInput.value.trim();
       if (!text) return;
+      
+      // Track stats
+      stats.messagesCount++;
+      stats.currentCombo++;
+      if (stats.currentCombo > stats.maxCombo) {
+        stats.maxCombo = stats.currentCombo;
+      }
+
+      const lowerText = text.toLowerCase();
+      
+      // Check for questions
+      if (/\b(what|how|why|when|where|who|does|is|can)\b/.test(lowerText)) {
+        stats.questionsAsked++;
+      }
+
+      // Check for wild words
+      wildWords.forEach(word => {
+        if (lowerText.includes(word.toLowerCase())) {
+          stats.wildcardsUsed++;
+          stats.uniqueWildcards.add(word.toLowerCase());
+        }
+      });
+
+      // Check for long message
+      if (text.length > 100) {
+        stats.longMessageSent = true;
+      }
+
+      // Check max craziness
+      const currentCrazy = Number(crazinessSlider.value);
+      if (currentCrazy > stats.max_craziness) {
+        stats.max_craziness = currentCrazy;
+      }
+
+      saveStats();
+
       appendMessage(text, 'user');
+      updateComboDisplay();
+      
+      // Show fun fact randomly
+      if (Math.random() < 0.15) {
+        showFunFact();
+      }
+
       chatInput.value = '';
       const typingBubble = appendMessage('Ben GPT is typing...', 'bot');
       const reply = getBotReply(text);
@@ -1120,20 +1793,29 @@
       if (reply.spam) {
         setGlitching(true);
         typingBubble.textContent = 'Ben GPT is yapping super loud...';
+        stats.spamReceived++;
       }
 
       if (reply.silent) {
         typingBubble.textContent = '...';
         setTimeout(() => {
-          // remove the typing bubble without adding a reply
           typingBubble.remove();
         }, 1000 + Math.random() * 1200);
+        checkAndUnlockAchievements();
         return;
       }
 
       if (showImage) {
         typingBubble.textContent = 'Ben is fetching an image...';
+        stats.imagesReceived++;
       }
+
+      if (showPenguinVideo) {
+        stats.penguinWatched = true;
+      }
+
+      stats.responsesReceived++;
+      saveStats();
 
       setTimeout(() => {
         typeReply(typingBubble, reply.text, typeSpeed, () => {
@@ -1149,6 +1831,7 @@
             img.alt = 'Random image result';
             typingBubble.appendChild(img);
           }
+          checkAndUnlockAchievements();
         });
         if (reply.spam) {
           const glitchDuration = 6200 + (reply.crazy || 0.5) * 3200;
