@@ -1430,6 +1430,8 @@
         comboCounter.classList.remove('active');
       }
     }
+
+    const messageList = document.getElementById('messageList');
     const chatInput = document.getElementById('chatInput');
     const sendButton = document.getElementById('sendButton');
     const suggestionList = document.getElementById('suggestionList');
@@ -2135,7 +2137,8 @@
       stats.lastWasSpam = false;
       
       // Track combo flags for this response
-      if (foundKeywords.length > 0) stats.lastWasWildcard = true;
+      const foundWildcards = wildWords.filter(word => lowerText.includes(word.toLowerCase()));
+      if (foundWildcards.length > 0) stats.lastWasWildcard = true;
       if (/\b(what|how|why|when|where|who|does|is|can)\b/.test(lowerText)) stats.lastWasQuestion = true;
       if (reply.spam) stats.lastWasSpam = true;
       
