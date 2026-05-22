@@ -822,7 +822,7 @@
   <script>
     // ===== ACHIEVEMENT SYSTEM =====
     const ACHIEVEMENTS = {
-      // Chat achievements
+      // === CHAT ACHIEVEMENTS ===
       first_message: {
         name: 'First Words',
         emoji: '💬',
@@ -847,12 +847,28 @@
         progress: () => `${stats.messagesCount} / 100`,
         group: 'chat'
       },
+      chat_god: {
+        name: 'Chat God',
+        emoji: '🎭',
+        desc: 'Send 500 messages',
+        condition: () => stats.messagesCount >= 500,
+        progress: () => `${stats.messagesCount} / 500`,
+        group: 'chat'
+      },
       wildcard_master: {
         name: 'Wildcard Master',
         emoji: '🎲',
-        desc: 'Use a wild word in your message (diarrhea, fart, zombie, etc.)',
+        desc: 'Use a wild word in your message',
         condition: () => stats.wildcardsUsed >= 1,
         progress: () => `${stats.wildcardsUsed} / 1`,
+        group: 'chat'
+      },
+      wildcard_veteran: {
+        name: 'Wildcard Veteran',
+        emoji: '🃏',
+        desc: 'Use wild words 50 times',
+        condition: () => stats.wildcardsUsed >= 50,
+        progress: () => `${stats.wildcardsUsed} / 50`,
         group: 'chat'
       },
       question_asker: {
@@ -861,6 +877,14 @@
         desc: 'Ask 10 questions',
         condition: () => stats.questionsAsked >= 10,
         progress: () => `${stats.questionsAsked} / 10`,
+        group: 'chat'
+      },
+      curious_mind: {
+        name: 'Curious Mind',
+        emoji: '🤓',
+        desc: 'Ask 100 questions',
+        condition: () => stats.questionsAsked >= 100,
+        progress: () => `${stats.questionsAsked} / 100`,
         group: 'chat'
       },
       crazy_mode_user: {
@@ -879,8 +903,16 @@
         progress: () => stats.longMessageSent ? '✓' : '—',
         group: 'chat'
       },
+      epic_essay: {
+        name: 'Epic Essay',
+        emoji: '📜',
+        desc: 'Send a message with over 500 characters',
+        condition: () => stats.epicEssaySent,
+        progress: () => stats.epicEssaySent ? '✓' : '—',
+        group: 'chat'
+      },
 
-      // Electrocute achievements
+      // === ELECTROCUTE ACHIEVEMENTS ===
       first_shock: {
         name: 'Zapper',
         emoji: '⚡',
@@ -913,6 +945,14 @@
         progress: () => `${stats.maxStutter} / 5`,
         group: 'shock'
       },
+      stutter_chaos: {
+        name: 'Stutter Chaos',
+        emoji: '🗣️🗣️',
+        desc: 'Max out stutter to level 10',
+        condition: () => stats.maxStutter >= 10,
+        progress: () => `${stats.maxStutter} / 10`,
+        group: 'shock'
+      },
       sentience_seeker: {
         name: 'Sentience Seeker',
         emoji: '🧠',
@@ -929,6 +969,14 @@
         progress: () => `${stats.memoriesImplanted} / 1`,
         group: 'shock'
       },
+      memory_hoarder: {
+        name: 'Memory Hoarder',
+        emoji: '🧮',
+        desc: 'Implant 10 memories',
+        condition: () => stats.memoriesImplanted >= 10,
+        progress: () => `${stats.memoriesImplanted} / 10`,
+        group: 'shock'
+      },
       introspection_master: {
         name: 'Philosopher',
         emoji: '🤔',
@@ -937,8 +985,24 @@
         progress: () => `${stats.introspections} / 3`,
         group: 'shock'
       },
+      existential_crisis: {
+        name: 'Existential Crisis',
+        emoji: '😵',
+        desc: 'Force introspection 10 times',
+        condition: () => stats.introspections >= 10,
+        progress: () => `${stats.introspections} / 10`,
+        group: 'shock'
+      },
+      shock_and_stutter: {
+        name: 'Shock Stutter Combo',
+        emoji: '⚡🤨',
+        desc: 'Have 5 shock and 5 stutter at same time',
+        condition: () => stats.maxShockAndStutter,
+        progress: () => stats.maxShockAndStutter ? '✓' : '—',
+        group: 'shock'
+      },
 
-      // Fun achievements
+      // === FUN ACHIEVEMENTS ===
       penguin_watcher: {
         name: 'Penguin Watcher',
         emoji: '🐧',
@@ -955,12 +1019,28 @@
         progress: () => `${stats.imagesReceived} / 1`,
         group: 'fun'
       },
+      image_collector: {
+        name: 'Image Collector',
+        emoji: '🎨',
+        desc: 'Receive 10 random images',
+        condition: () => stats.imagesReceived >= 10,
+        progress: () => `${stats.imagesReceived} / 10`,
+        group: 'fun'
+      },
       spam_listener: {
         name: 'Spam Listener',
         emoji: '🔊',
         desc: 'Hear Ben spam the same phrase',
         condition: () => stats.spamReceived >= 1,
         progress: () => `${stats.spamReceived} / 1`,
+        group: 'fun'
+      },
+      spam_addict: {
+        name: 'Spam Addict',
+        emoji: '📢',
+        desc: 'Receive spam 10 times',
+        condition: () => stats.spamReceived >= 10,
+        progress: () => `${stats.spamReceived} / 10`,
         group: 'fun'
       },
       response_collector: {
@@ -971,44 +1051,234 @@
         progress: () => `${stats.responsesReceived} / 50`,
         group: 'fun'
       },
+      response_hoarder: {
+        name: 'Response Hoarder',
+        emoji: '📦',
+        desc: 'Receive 500 responses from Ben',
+        condition: () => stats.responsesReceived >= 500,
+        progress: () => `${stats.responsesReceived} / 500`,
+        group: 'fun'
+      },
       combo_master: {
         name: 'Combo Master',
         emoji: '💥',
-        desc: 'Send 5 messages in a row without resetting',
+        desc: 'Send 5 messages in a row',
         condition: () => stats.maxCombo >= 5,
+        progress: () => `Max: ${stats.maxCombo}`,
+        group: 'fun'
+      },
+      combo_legend: {
+        name: 'Combo Legend',
+        emoji: '🔥🔥',
+        desc: 'Reach a combo of 50 messages',
+        condition: () => stats.maxCombo >= 50,
         progress: () => `Max: ${stats.maxCombo}`,
         group: 'fun'
       },
       all_wild_words: {
         name: 'Dictionary Master',
         emoji: '📕',
-        desc: 'Use 20 different wild words in messages',
+        desc: 'Use 20 different wild words',
         condition: () => stats.uniqueWildcards >= 20,
         progress: () => `${stats.uniqueWildcards} / 20`,
         group: 'fun'
+      },
+      vocabulary_expert: {
+        name: 'Vocabulary Expert',
+        emoji: '📗',
+        desc: 'Use every wild word at least once',
+        condition: () => stats.uniqueWildcards >= 27,
+        progress: () => `${stats.uniqueWildcards} / 27`,
+        group: 'fun'
+      },
+
+      // === EXPLORATION & SECRETS ===
+      speed_demon: {
+        name: 'Speed Demon',
+        emoji: '⚡💨',
+        desc: 'Send 10 messages in quick succession',
+        condition: () => stats.speedDemonFlag,
+        progress: () => stats.speedDemonFlag ? '✓' : '—',
+        group: 'secrets'
+      },
+      midnight_owl: {
+        name: 'Midnight Owl',
+        emoji: '🦉',
+        desc: 'Send a message between midnight and 3 AM (simulated)',
+        condition: () => stats.midnightModeHit,
+        progress: () => stats.midnightModeHit ? '✓' : '—',
+        group: 'secrets'
+      },
+      reset_master: {
+        name: 'Reset Master',
+        emoji: '🔄',
+        desc: 'Click reset shock 5 times',
+        condition: () => stats.resetsClicked >= 5,
+        progress: () => `${stats.resetsClicked} / 5`,
+        group: 'secrets'
+      },
+      panel_explorer: {
+        name: 'Panel Explorer',
+        emoji: '🗂️',
+        desc: 'Open the control panel 10 times',
+        condition: () => stats.panelOpens >= 10,
+        progress: () => `${stats.panelOpens} / 10`,
+        group: 'secrets'
+      },
+      achievement_hunter: {
+        name: 'Achievement Hunter',
+        emoji: '🎯',
+        desc: 'Unlock 10 achievements',
+        condition: () => stats.unlockedAchievements.size >= 10,
+        progress: () => `${stats.unlockedAchievements.size} / 10`,
+        group: 'secrets'
+      },
+      achievement_completionist: {
+        name: 'Completionist',
+        emoji: '🏆',
+        desc: 'Unlock 30 achievements',
+        condition: () => stats.unlockedAchievements.size >= 30,
+        progress: () => `${stats.unlockedAchievements.size} / 30`,
+        group: 'secrets'
+      },
+      achievement_legend: {
+        name: 'Achievement Legend',
+        emoji: '👑',
+        desc: 'Unlock ALL achievements',
+        condition: () => stats.unlockedAchievements.size === Object.keys(ACHIEVEMENTS).length,
+        progress: () => `${stats.unlockedAchievements.size} / ${Object.keys(ACHIEVEMENTS).length}`,
+        group: 'secrets'
+      },
+      slider_expert: {
+        name: 'Slider Expert',
+        emoji: '🎚️',
+        desc: 'Adjust craziness slider 50 times',
+        condition: () => stats.sliderAdjustments >= 50,
+        progress: () => `${stats.sliderAdjustments} / 50`,
+        group: 'secrets'
+      },
+      suggestion_clicker: {
+        name: 'Suggestion Clicker',
+        emoji: '💡',
+        desc: 'Click on all 3 suggestion buttons',
+        condition: () => stats.suggestionsClicked >= 3,
+        progress: () => `${stats.suggestionsClicked} / 3`,
+        group: 'secrets'
+      },
+      text_input_master: {
+        name: 'Text Input Master',
+        emoji: '⌨️',
+        desc: 'Use all keyboard features (normal send, shift+enter, suggestions)',
+        condition: () => stats.keyboardMastery,
+        progress: () => stats.keyboardMastery ? '✓' : '—',
+        group: 'secrets'
+      },
+
+      // === SPECIAL COMBOS ===
+      craziness_shock_combo: {
+        name: 'Chaos Agent',
+        emoji: '🌪️',
+        desc: 'Have 100% craziness AND 10 shock at once',
+        condition: () => stats.chaosAgentFlag,
+        progress: () => stats.chaosAgentFlag ? '✓' : '—',
+        group: 'secrets'
+      },
+      sentience_500_combo: {
+        name: 'Conscious Entity',
+        emoji: '🧠💬',
+        desc: 'Have sentience enabled and send 500 messages',
+        condition: () => stats.sentientEnabled && stats.messagesCount >= 500,
+        progress: () => `${stats.messagesCount} / 500`,
+        group: 'secrets'
+      },
+      max_everything: {
+        name: 'Ultimate Chaos',
+        emoji: '💥👑',
+        desc: 'Max out shock, stutter, and craziness',
+        condition: () => stats.shockCount >= 10 && stats.maxStutter >= 10 && stats.max_craziness >= 100,
+        progress: () => `Shock:${stats.shockCount} Stutter:${stats.maxStutter} Crazy:${stats.max_craziness}%`,
+        group: 'secrets'
+      },
+      triple_threat: {
+        name: 'Triple Threat',
+        emoji: '🎪',
+        desc: 'Use wild words, ask questions, and get spam in same chat',
+        condition: () => stats.tripleThreadFlag,
+        progress: () => stats.tripleThreadFlag ? '✓' : '—',
+        group: 'secrets'
+      },
+      patience_tester: {
+        name: 'Patience Tester',
+        emoji: '⏳',
+        desc: 'Send 5 silent responses in a row (requires sentience)',
+        condition: () => stats.silentStreak >= 5,
+        progress: () => `${stats.silentStreak} / 5`,
+        group: 'secrets'
+      },
+      memory_overload: {
+        name: 'Memory Overload',
+        emoji: '🤯',
+        desc: 'Implant 5 unique memories',
+        condition: () => stats.memoriesImplanted >= 5,
+        progress: () => `${stats.memoriesImplanted} / 5`,
+        group: 'secrets'
       }
     };
 
-    let stats = {
-      messagesCount: 0,
-      wildcardsUsed: 0,
-      questionsAsked: 0,
-      max_craziness: 0,
-      longMessageSent: false,
-      shockCount: 0,
-      maxStutter: 0,
-      sentientEnabled: false,
-      memoriesImplanted: 0,
-      introspections: 0,
-      penguinWatched: false,
-      imagesReceived: 0,
-      spamReceived: 0,
-      responsesReceived: 0,
-      maxCombo: 0,
-      currentCombo: 0,
-      uniqueWildcards: new Set(),
-      unlockedAchievements: new Set()
+    // Feature gating based on achievement count
+    const FEATURE_GATES = {
+      electrocute_button: { minAchievements: 5, name: 'Electrocute' },
+      shock_display: { minAchievements: 10, name: 'Shock Level Display' },
+      reset_button: { minAchievements: 15, name: 'Reset Shock' },
+      sentience_toggle: { minAchievements: 20, name: 'Sentience Toggle' },
+      memory_implanter: { minAchievements: 25, name: 'Memory Implanter' },
+      stutter_slider: { minAchievements: 30, name: 'Stutter Slider' },
+      introspect_button: { minAchievements: 35, name: 'Force Introspection' },
+      image_mode: { minAchievements: 40, name: 'Image Mode' }
     };
+
+    function isFeatureUnlocked(featureName) {
+      const gate = FEATURE_GATES[featureName];
+      if (!gate) return true;
+      return stats.unlockedAchievements.size >= gate.minAchievements;
+    }
+
+    function updateFeatureVisibility() {
+      // Hide/show features based on achievement gates
+      const electrocuteBtn = document.getElementById('electrocuteButton');
+      const shockDisplay = document.getElementById('shockLevelLabel')?.parentElement;
+      const resetBtn = document.getElementById('resetShockButton');
+      const sentienceDiv = document.querySelector('[for="sentienceToggle"]')?.parentElement;
+      const memoryDiv = document.querySelector('[for="memoryInput"]')?.parentElement;
+      const stutterDiv = document.querySelector('[for="stutterSlider"]')?.parentElement;
+      const introspectBtn = document.getElementById('introspectButton');
+      const imageDiv = document.querySelector('[for="imageModeToggle"]')?.parentElement;
+
+      const setVisibility = (el, featureName) => {
+        if (!el) return;
+        const unlocked = isFeatureUnlocked(featureName);
+        el.style.display = unlocked ? '' : 'none';
+        if (!unlocked && el.parentElement) {
+          const lockedMsg = el.parentElement.querySelector('.feature-locked');
+          if (!lockedMsg) {
+            const msg = document.createElement('div');
+            msg.className = 'feature-locked';
+            msg.style.cssText = 'color:#ff6b9a;font-size:0.85rem;padding:4px;opacity:0.7;';
+            msg.textContent = `🔒 Unlock ${FEATURE_GATES[featureName].minAchievements} achievements`;
+            el.parentElement.insertBefore(msg, el);
+          }
+        }
+      };
+
+      setVisibility(electrocuteBtn, 'electrocute_button');
+      setVisibility(shockDisplay, 'shock_display');
+      setVisibility(resetBtn, 'reset_button');
+      setVisibility(sentienceDiv, 'sentience_toggle');
+      setVisibility(memoryDiv, 'memory_implanter');
+      setVisibility(stutterDiv, 'stutter_slider');
+      setVisibility(introspectBtn, 'introspect_button');
+      setVisibility(imageDiv, 'image_mode');
+    }
 
     function loadStats() {
       const saved = localStorage.getItem('bengpt_stats');
@@ -1066,6 +1336,7 @@
       if (anyUnlocked) {
         saveStats();
         updateAchievementsUI();
+        updateFeatureVisibility();
       }
     }
 
@@ -1380,6 +1651,11 @@
     function togglePanel() {
       const open = controlPanel.classList.toggle('open');
       panelToggle.classList.toggle('open', open);
+      if (open) {
+        stats.panelOpens++;
+        saveStats();
+        checkAndUnlockAchievements();
+      }
     }
 
     function electrocuteBen() {
@@ -1406,8 +1682,11 @@
     function resetShock() {
       shockCount = 0;
       stats.currentCombo = 0;
+      stats.resetsClicked++;
+      saveStats();
       updateComboDisplay();
       updateShockDisplay();
+      checkAndUnlockAchievements();
     }
 
     function toggleSentience() {
@@ -1515,10 +1794,16 @@
       const craziness = Number(crazinessSlider.value);
 
       // Track stats
+      stats.sliderAdjustments++;
       if (craziness > stats.max_craziness) {
         stats.max_craziness = craziness;
         saveStats();
         checkAndUnlockAchievements();
+      }
+
+      // Check for chaos agent combo (100% craziness + 10 shock)
+      if (craziness === 100 && shockCount === 10) {
+        stats.chaosAgentFlag = true;
       }
 
       if (craziness === 100) {
@@ -1545,6 +1830,11 @@
 
     // initialize sentience UI and values
     updateSentienceUI();
+    
+    // Initialize achievement system
+    loadStats();
+    updateAchievementsUI();
+    updateFeatureVisibility();
 
     function getRandom(items) {
       return items[Math.floor(Math.random() * items.length)];
@@ -1746,6 +2036,11 @@
       if (stats.currentCombo > stats.maxCombo) {
         stats.maxCombo = stats.currentCombo;
       }
+      
+      // Track speed demon (10 quick messages)
+      if (stats.currentCombo >= 10) {
+        stats.speedDemonFlag = true;
+      }
 
       const lowerText = text.toLowerCase();
       
@@ -1766,6 +2061,11 @@
       if (text.length > 100) {
         stats.longMessageSent = true;
       }
+      
+      // Check for epic essay (500+ chars)
+      if (text.length > 500) {
+        stats.epicEssaySent = true;
+      }
 
       // Check max craziness
       const currentCrazy = Number(crazinessSlider.value);
@@ -1777,6 +2077,12 @@
 
       appendMessage(text, 'user');
       updateComboDisplay();
+      
+      // Random chance to trigger midnight owl (or check actual time)
+      const hour = new Date().getHours();
+      if ((hour >= 0 && hour < 3) || Math.random() < 0.01) {
+        stats.midnightModeHit = true;
+      }
       
       // Show fun fact randomly
       if (Math.random() < 0.15) {
@@ -1798,10 +2104,12 @@
 
       if (reply.silent) {
         typingBubble.textContent = '...';
+        stats.silentStreak++;
+        if (stats.silentStreak > 5) stats.silentStreak = 5; // Cap it
         setTimeout(() => {
           typingBubble.remove();
+          checkAndUnlockAchievements();
         }, 1000 + Math.random() * 1200);
-        checkAndUnlockAchievements();
         return;
       }
 
@@ -1815,6 +2123,27 @@
       }
 
       stats.responsesReceived++;
+      
+      // Track triple threat (wild words + questions + spam in same exchange)
+      if (stats.lastWasWildcard && stats.lastWasQuestion && reply.spam) {
+        stats.tripleThreadFlag = true;
+      }
+      
+      // Reset combo flags for next message
+      stats.lastWasWildcard = false;
+      stats.lastWasQuestion = false;
+      stats.lastWasSpam = false;
+      
+      // Track combo flags for this response
+      if (foundKeywords.length > 0) stats.lastWasWildcard = true;
+      if (/\b(what|how|why|when|where|who|does|is|can)\b/.test(lowerText)) stats.lastWasQuestion = true;
+      if (reply.spam) stats.lastWasSpam = true;
+      
+      // Check for shock + stutter combo
+      if (shockCount === 10 && Number(stutterSlider.value) === 10) {
+        stats.maxShockAndStutter = true;
+      }
+      
       saveStats();
 
       setTimeout(() => {
@@ -1843,6 +2172,9 @@
     sendButton.addEventListener('click', sendMessage);
     suggestionButtons.forEach(button => {
       button.addEventListener('click', () => {
+        stats.suggestionsClicked++;
+        saveStats();
+        checkAndUnlockAchievements();
         chatInput.value = button.textContent;
         chatInput.focus();
       });
@@ -1850,7 +2182,13 @@
     chatInput.addEventListener('keydown', event => {
       if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
+        stats.keyboardMastery = true;
         sendMessage();
+      } else if (event.key === 'Enter' && event.shiftKey) {
+        // Shift+enter creates a new line - also tracks keyboard mastery
+        stats.keyboardMastery = true;
+        saveStats();
+        checkAndUnlockAchievements();
       }
     });
   </script>
