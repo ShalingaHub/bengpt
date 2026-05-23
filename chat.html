@@ -1628,10 +1628,12 @@
       const crazy = Number(crazinessSlider.value) / 100;
       const lower = userText.toLowerCase();
 
-      if (lower.includes('aw shucks')) {
+      if (/\baw shucks\b/.test(lower) || /\bawshucks\b/.test(lower)) {
         return {
           text: 'aw shucks...',
-          special: 'awshucks'
+          special: 'awshucks',
+          spam: false,
+          crazy
         };
       }
       // Sentience-driven pauses or silence
@@ -1843,6 +1845,9 @@
         typeReply(typingBubble, reply.text, typeSpeed, () => {
           if (showPenguinVideo) {
             appendVideoToMessage(typingBubble, 'low quality penguin.mp4');
+          }
+          if (reply.special === 'awshucks') {
+            appendVideoToMessage(typingBubble, 'awshucks.mp4');
           }
           if (showImage) {
             const img = document.createElement('img');
