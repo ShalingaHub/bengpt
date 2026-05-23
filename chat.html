@@ -1750,6 +1750,20 @@
       video.play().catch(() => {});
     }
 
+    function showAwShucksVideo() {
+      const video = document.getElementById('awShucksVideo');
+      if (!video) return;
+      video.src = 'awshucks.mp4';
+      video.style.display = 'block';
+      video.play().catch(() => {});
+      const hideVideo = () => {
+        video.pause();
+        video.style.display = 'none';
+      };
+      video.addEventListener('click', hideVideo, { once: true });
+      setTimeout(hideVideo, 8500);
+    }
+
     function setGlitching(state) {
       if (state) {
         document.body.classList.add('glitching');
@@ -1843,6 +1857,9 @@
         typeReply(typingBubble, reply.text, typeSpeed, () => {
           if (showPenguinVideo) {
             appendVideoToMessage(typingBubble, 'low quality penguin.mp4');
+          }
+          if (reply.special === 'awshucks') {
+            showAwShucksVideo();
           }
           if (showImage) {
             const img = document.createElement('img');
