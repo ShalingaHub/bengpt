@@ -1621,6 +1621,16 @@
           crazy
         };
       }
+      // Special case: "show me the door" triggers full-screen door overlay
+      if (lower.includes('show me the door')) {
+        return {
+          text: '...',
+          special: 'door',
+          spam: false,
+          crazy,
+          silent: true
+        };
+      }
       // Sentience-driven pauses or silence
       if (sentient) {
         const stutterChance = Math.min(0.5, 0.12 + sentientLevel * 0.06);
@@ -1740,6 +1750,48 @@
       video.play().catch(() => {});
     }
 
+    function showDoorScreen() {
+      const overlay = document.createElement('div');
+      overlay.id = 'doorOverlay';
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50000;
+        cursor: pointer;
+      `;
+
+      const doorImg = document.createElement('img');
+      doorImg.src = './door.png';
+      doorImg.alt = 'The Door';
+      doorImg.style.cssText = `
+        max-width: 90vw;
+        max-height: 90vh;
+        object-fit: contain;
+      `;
+
+      overlay.appendChild(doorImg);
+
+      const audio = document.createElement('audio');
+      audio.src = './man.mp3';
+      audio.loop = true;
+      audio.autoplay = true;
+      overlay.appendChild(audio);
+
+      overlay.addEventListener('click', () => {
+        audio.pause();
+        overlay.remove();
+      });
+
+      document.body.appendChild(overlay);
+    }
+
     function setGlitching(state) {
       if (state) {
         document.body.classList.add('glitching');
@@ -1828,6 +1880,13 @@
 
       stats.responsesReceived++;
       saveStats();
+
+      if (reply.special === 'door') {
+        typingBubble.remove();
+        showDoorScreen();
+        checkAndUnlockAchievements();
+        return;
+      }
 
       setTimeout(() => {
         typeReply(typingBubble, reply.text, typeSpeed, () => {
