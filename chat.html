@@ -1628,10 +1628,12 @@
       const crazy = Number(crazinessSlider.value) / 100;
       const lower = userText.toLowerCase();
 
-      if (lower.includes('aw shucks')) {
+      if (/\baw shucks\b/.test(lower) || /\bawshucks\b/.test(lower)) {
         return {
           text: 'aw shucks...',
-          special: 'awshucks'
+          special: 'awshucks',
+          spam: false,
+          crazy
         };
       }
       // Sentience-driven pauses or silence
@@ -1750,20 +1752,6 @@
       video.play().catch(() => {});
     }
 
-    function showAwShucksVideo() {
-      const video = document.getElementById('awShucksVideo');
-      if (!video) return;
-      video.src = 'awshucks.mp4';
-      video.style.display = 'block';
-      video.play().catch(() => {});
-      const hideVideo = () => {
-        video.pause();
-        video.style.display = 'none';
-      };
-      video.addEventListener('click', hideVideo, { once: true });
-      setTimeout(hideVideo, 8500);
-    }
-
     function setGlitching(state) {
       if (state) {
         document.body.classList.add('glitching');
@@ -1859,7 +1847,7 @@
             appendVideoToMessage(typingBubble, 'low quality penguin.mp4');
           }
           if (reply.special === 'awshucks') {
-            showAwShucksVideo();
+            appendVideoToMessage(typingBubble, 'awshucks.mp4');
           }
           if (showImage) {
             const img = document.createElement('img');
