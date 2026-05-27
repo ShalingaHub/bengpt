@@ -545,22 +545,37 @@
       right: 0;
       top: 50%;
       transform: translate(100%, -50%);
-      width: min(320px, calc(100vw - 32px));
-      max-height: 80vh;
-      background: rgba(7, 11, 23, 0.95);
-      border: 1px solid rgba(255,255,255,0.1);
+      width: min(380px, calc(100vw - 32px));
+      max-height: 85vh;
+      background: linear-gradient(135deg, rgba(7, 11, 23, 0.98), rgba(14, 20, 40, 0.95));
+      border: 2px solid rgba(79, 155, 255, 0.2);
       border-radius: 24px 0 0 24px;
       box-shadow: -16px 24px 60px rgba(0, 0, 0, 0.45);
-      padding: 22px;
+      padding: 18px;
       color: #dbe3ff;
       z-index: 11000;
       transition: transform 220ms ease;
       display: grid;
-      gap: 16px;
+      gap: 12px;
+      grid-template-rows: auto 1fr;
+      overflow-y: auto;
     }
 
     .control-panel.open {
       transform: translate(0, -50%);
+    }
+    
+    .control-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .control-panel::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.02);
+    }
+    
+    .control-panel::-webkit-scrollbar-thumb {
+      background: rgba(79, 155, 255, 0.3);
+      border-radius: 3px;
     }
 
     .panel-header {
@@ -765,43 +780,76 @@
   </main>
   <aside class="control-panel" id="controlPanel">
     <div class="panel-header">
-      <span>Control Panel</span>
+      <span>⚙️ Control Panel</span>
       <button class="panel-close" id="panelClose" aria-label="Close control panel">×</button>
     </div>
     <div class="panel-body">
-      <p class="panel-note">Shock Ben GPT to make him talk shorter and stutter more.</p>
-      <div class="panel-stat">Shock level: <strong id="shockLevelLabel">0</strong></div>
-      <button type="button" class="electrocute-button" id="electrocuteButton">Electrocute</button>
-      <button type="button" class="reset-button" id="resetShockButton">Reset Shock</button>
-      <hr style="opacity:.06;border:none;height:1px;background:rgba(255,255,255,0.04);" />
-      <label class="panel-note" for="sentienceToggle">Sentience</label>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input id="sentienceToggle" type="checkbox" />
-        <small class="panel-hint">Toggle Ben's self-awareness (simulated)</small>
-      </div>
-      <div>
-        <label class="panel-note" for="memoryInput">Implant memory</label>
-        <div style="display:flex;gap:8px;margin-top:6px;">
-          <input id="memoryInput" placeholder="Remember this..." style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;" />
-          <button id="implantMemoryButton" class="reset-button">Implant</button>
+      <!-- Shock Controls -->
+      <div style="background:rgba(79,155,255,0.08);border:1px solid rgba(79,155,255,0.15);border-radius:12px;padding:12px;">
+        <p class="panel-note" style="margin:0 0 10px;">⚡ Shock Controls</p>
+        <div class="panel-stat">Shock level: <strong id="shockLevelLabel">0</strong>/10</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          <button type="button" class="electrocute-button" id="electrocuteButton" style="padding:12px;">Shock</button>
+          <button type="button" class="reset-button" id="resetShockButton" style="padding:12px;">Reset</button>
         </div>
       </div>
-      <div>
-        <label class="panel-note" for="stutterSlider">Stutter intensity: <strong id="stutterValue">0</strong></label>
-        <input id="stutterSlider" type="range" min="0" max="10" value="0" style="width:100%;" />
+
+      <!-- Mood & Stutter -->
+      <div style="background:rgba(255,215,107,0.08);border:1px solid rgba(255,215,107,0.15);border-radius:12px;padding:12px;">
+        <p class="panel-note" style="margin:0 0 8px;">😄 Mood Settings</p>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+          <button id="moodCycleBtn" class="reset-button" style="flex:1;padding:8px;font-size:0.9rem;">Cycle Mood</button>
+          <span id="moodDisplay" style="font-weight:700;color:#ffd76b;">😐</span>
+        </div>
+        <div style="font-size:0.85rem;color:#a8b7ff;">Stutter: <strong id="stutterValue">0</strong></div>
+        <input id="stutterSlider" type="range" min="0" max="10" value="0" style="width:100%;margin-top:4px;" />
       </div>
-      <div>
-        <label class="panel-note">Sentient level</label>
-        <div style="background:rgba(255,255,255,0.04);height:10px;border-radius:999px;overflow:hidden;margin-top:6px;">
-          <div id="sentientBar" style="width:0%;height:100%;background:linear-gradient(90deg,#ffd36b,#ff6b9a);"></div>
+
+      <!-- Sentience -->
+      <div style="background:rgba(255,155,107,0.08);border:1px solid rgba(255,155,107,0.15);border-radius:12px;padding:12px;">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+          <input id="sentienceToggle" type="checkbox" style="cursor:pointer;" />
+          <label class="panel-note" for="sentienceToggle" style="margin:0;cursor:pointer;">🧠 Sentience</label>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden;">
+          <div id="sentientBar" style="width:0%;height:100%;background:linear-gradient(90deg,#ff6b9a,#ff9bff);transition:width 200ms ease;"></div>
+        </div>
+        <small class="panel-hint" style="display:block;margin-top:6px;">Level: <strong id="sentientLevel">0</strong>/10</small>
+      </div>
+
+      <!-- Memory & Special -->
+      <div style="background:rgba(107,155,255,0.08);border:1px solid rgba(107,155,255,0.15);border-radius:12px;padding:12px;">
+        <p class="panel-note" style="margin:0 0 8px;">💾 Memory Implant</p>
+        <div style="display:flex;gap:6px;">
+          <input id="memoryInput" placeholder="Type..." style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:inherit;font-size:0.9rem;" />
+          <button id="implantMemoryButton" class="reset-button" style="padding:8px 12px;font-size:0.9rem;">Implant</button>
         </div>
       </div>
-      <button id="introspectButton" class="electrocute-button">Force Introspection</button>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
-        <input id="imageModeToggle" type="checkbox" />
-        <label class="panel-note" for="imageModeToggle">Image mode (respond with random images)</label>
+
+      <!-- Power Buttons -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button id="introspectButton" class="electrocute-button" style="padding:10px;font-size:0.9rem;min-height:40px;">🤔 Ponder</button>
+        <button id="randomResponseBtn" class="electrocute-button" style="padding:10px;font-size:0.9rem;min-height:40px;">🎲 Random</button>
       </div>
-      <p class="panel-hint">More shocks = fewer words, more uhhhhhhh, stronger stutter, and rising sentience.</p>
+
+      <!-- Fun Toggles -->
+      <div style="display:grid;gap:8px;">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input id="imageModeToggle" type="checkbox" style="cursor:pointer;" />
+          <label class="panel-note" for="imageModeToggle" style="margin:0;cursor:pointer;font-size:0.9rem;">🖼️ Image Mode</label>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input id="soundToggle" type="checkbox" checked style="cursor:pointer;" />
+          <label class="panel-note" for="soundToggle" style="margin:0;cursor:pointer;font-size:0.9rem;">🔊 Sound Effects</label>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input id="effectsToggle" type="checkbox" checked style="cursor:pointer;" />
+          <label class="panel-note" for="effectsToggle" style="margin:0;cursor:pointer;font-size:0.9rem;">✨ Visual Effects</label>
+        </div>
+      </div>
+
+      <!-- Hints -->
+      <p class="panel-hint" style="margin:8px 0 0;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);font-size:0.85rem;">💡 Try: "show me the door" for a secret</p>
     </div>
   </aside>
   <button class="panel-toggle" id="panelToggle" aria-label="Open control panel">»</button>
@@ -1106,6 +1154,94 @@
       });
     }
 
+    // Additional achievements
+    ACHIEVEMENTS.door_discovery = {
+      name: 'Door Keeper',
+      emoji: '🚪',
+      desc: 'Discover the secret door by saying "show me the door"',
+      condition: () => stats.doorDiscovered,
+      progress: () => stats.doorDiscovered ? '✓' : '—',
+      group: 'fun'
+    };
+    ACHIEVEMENTS.zen_master = {
+      name: 'Zen Master',
+      emoji: '🧘',
+      desc: 'Trigger Ben\'s silent contemplation 5 times',
+      condition: () => stats.silentMoments >= 5,
+      progress: () => `${stats.silentMoments} / 5`,
+      group: 'fun'
+    };
+    ACHIEVEMENTS.control_freak = {
+      name: 'Control Freak',
+      emoji: '🎮',
+      desc: 'Use every control panel button at least once',
+      condition: () => stats.allButtonsUsed,
+      progress: () => stats.allButtonsUsed ? '✓' : '—',
+      group: 'shock'
+    };
+    ACHIEVEMENTS.mood_master = {
+      name: 'Mood Master',
+      emoji: '😄',
+      desc: 'Cycle through all of Ben\'s moods',
+      condition: () => stats.allMoodsTriggered >= 5,
+      progress: () => `${stats.allMoodsTriggered} / 5`,
+      group: 'shock'
+    };
+    ACHIEVEMENTS.chaos_engineer = {
+      name: 'Chaos Engineer',
+      emoji: '🌪️',
+      desc: 'Trigger 20 special events',
+      condition: () => stats.specialEvents >= 20,
+      progress: () => `${stats.specialEvents} / 20`,
+      group: 'fun'
+    };
+    ACHIEVEMENTS.button_masher = {
+      name: 'Button Masher',
+      emoji: '🔨',
+      desc: 'Click any control panel button 50 times',
+      condition: () => stats.totalButtonClicks >= 50,
+      progress: () => `${stats.totalButtonClicks} / 50`,
+      group: 'shock'
+    };
+    ACHIEVEMENTS.music_lover = {
+      name: 'Music Lover',
+      emoji: '🎵',
+      desc: 'Play crazy audio 5 times at 100% craziness',
+      condition: () => stats.crazyAudioPlayed >= 5,
+      progress: () => `${stats.crazyAudioPlayed} / 5`,
+      group: 'fun'
+    };
+    ACHIEVEMENTS.golden_tongue = {
+      name: 'Golden Tongue',
+      emoji: '👑',
+      desc: 'Get a coherent response at 0% craziness 10 times',
+      condition: () => stats.coherentResponses >= 10,
+      progress: () => `${stats.coherentResponses} / 10`,
+      group: 'chat'
+    };
+    ACHIEVEMENTS.glitch_collector = {
+      name: 'Glitch Collector',
+      emoji: '📡',
+      desc: 'Trigger the glitch effect 15 times',
+      condition: () => stats.glitchesTriggered >= 15,
+      progress: () => `${stats.glitchesTriggered} / 15`,
+      group: 'fun'
+    };
+
+    // Update stats initialization with new fields
+    Object.assign(stats, {
+      doorDiscovered: false,
+      silentMoments: 0,
+      allButtonsUsed: false,
+      allMoodsTriggered: 0,
+      specialEvents: 0,
+      totalButtonClicks: 0,
+      crazyAudioPlayed: 0,
+      coherentResponses: 0,
+      glitchesTriggered: 0,
+      usedButtons: new Set()
+    });
+
     const achievementsPanel = document.getElementById('achievementsPanel');
     const achievementsToggle = document.getElementById('achievementsToggle');
     const achievementsClose = document.getElementById('achievementsClose');
@@ -1349,6 +1485,12 @@
     const sentientBar = document.getElementById('sentientBar');
     const introspectButton = document.getElementById('introspectButton');
     const imageModeToggle = document.getElementById('imageModeToggle');
+    const moodCycleBtn = document.getElementById('moodCycleBtn');
+    const moodDisplay = document.getElementById('moodDisplay');
+    const soundToggle = document.getElementById('soundToggle');
+    const effectsToggle = document.getElementById('effectsToggle');
+    const randomResponseBtn = document.getElementById('randomResponseBtn');
+    const sentientLevelDisplay = document.getElementById('sentientLevel');
 
     function createCrazinessAudio() {
       return 'house.mp3';
@@ -1360,6 +1502,26 @@
     let storedMemory = localStorage.getItem('ben_memory') || '';
     let sentientLevel = Number(localStorage.getItem('ben_sentientLevel') || 0);
     let imageMode = false;
+    
+    // Mood system
+    const moods = [
+      { name: 'Neutral', emoji: '😐', effect: 'neutral' },
+      { name: 'Happy', emoji: '😄', effect: 'happy' },
+      { name: 'Confused', emoji: '🤨', effect: 'confused' },
+      { name: 'Chaotic', emoji: '🤪', effect: 'chaotic' },
+      { name: 'Philosophical', emoji: '🤔', effect: 'philosophical' }
+    ];
+    let currentMoodIndex = 0;
+    let soundEnabled = localStorage.getItem('ben_sound') !== 'false';
+    let effectsEnabled = localStorage.getItem('ben_effects') !== 'false';
+    
+    function trackButtonClick() {
+      stats.totalButtonClicks++;
+      if (stats.totalButtonClicks >= 50) {
+        stats.allButtonsUsed = true;
+      }
+      saveStats();
+    }
 
     function updateShockDisplay() {
       shockLevelLabel.textContent = shockCount;
@@ -1373,8 +1535,42 @@
     function updateSentienceUI() {
       sentienceToggle.checked = sentient;
       stutterValue.textContent = stutterSlider.value;
+      sentientLevelDisplay.textContent = Math.floor(sentientLevel);
       sentientBar.style.width = Math.min(100, sentientLevel * 10) + '%';
       localStorage.setItem('ben_sentientLevel', String(sentientLevel));
+    }
+    
+    function cycleMood() {
+      currentMoodIndex = (currentMoodIndex + 1) % moods.length;
+      const mood = moods[currentMoodIndex];
+      moodDisplay.textContent = mood.emoji;
+      stats.allMoodsTriggered++;
+      stats.specialEvents++;
+      saveStats();
+      checkAndUnlockAchievements();
+      trackButtonClick();
+    }
+    
+    function updateMoodDisplay() {
+      moodDisplay.textContent = moods[currentMoodIndex].emoji;
+    }
+    
+    function getRandomResponse() {
+      // Just send a random message through Ben
+      const randomTemplates = [
+        'Did you know that penguins have knees?',
+        'I\'m thinking about the meaning of existence...',
+        'Random chaos mode: ACTIVATED',
+        'Did you ever wonder why we\'re here?',
+        'I just generated a completely random thought!',
+        'Beep boop, processing randomness...'
+      ];
+      const randomMsg = randomTemplates[Math.floor(Math.random() * randomTemplates.length)];
+      appendMessage('Ben GPT (random): ' + randomMsg, 'bot');
+      stats.specialEvents++;
+      saveStats();
+      trackButtonClick();
+      checkAndUnlockAchievements();
     }
 
     function togglePanel() {
@@ -1393,14 +1589,20 @@
       // Track stats
       stats.shockCount = shockCount;
       stats.maxStutter = Math.max(stats.maxStutter, Number(stutterSlider.value));
+      stats.allMoodsTriggered++;
+      stats.specialEvents++;
       saveStats();
       
       updateSentienceUI();
       updateShockDisplay();
       checkAndUnlockAchievements();
+      trackButtonClick();
       
-      document.body.classList.add('glitching');
-      setTimeout(() => document.body.classList.remove('glitching'), 320);
+      if (effectsEnabled) {
+        document.body.classList.add('glitching');
+        stats.glitchesTriggered++;
+        setTimeout(() => document.body.classList.remove('glitching'), 320);
+      }
     }
 
     function resetShock() {
@@ -1408,6 +1610,7 @@
       stats.currentCombo = 0;
       updateComboDisplay();
       updateShockDisplay();
+      trackButtonClick();
     }
 
     function toggleSentience() {
@@ -1416,10 +1619,12 @@
         // give a little boost when enabling
         sentientLevel = Math.min(10, sentientLevel + 1);
         stats.sentientEnabled = true;
+        stats.allMoodsTriggered++;
         saveStats();
         checkAndUnlockAchievements();
       }
       updateSentienceUI();
+      trackButtonClick();
     }
 
     function implantMemory() {
@@ -1443,10 +1648,12 @@
       
       // Track stats
       stats.memoriesImplanted++;
+      stats.specialEvents++;
       saveStats();
       
       updateSentienceUI();
       checkAndUnlockAchievements();
+      trackButtonClick();
     }
 
     function stutterText(text) {
@@ -1479,12 +1686,15 @@
       
       // Track stats
       stats.introspections++;
+      stats.allMoodsTriggered++;
+      stats.specialEvents++;
       saveStats();
       
       // small sentience increase when introspecting
       sentientLevel = Math.min(10, sentientLevel + 1);
       updateSentienceUI();
       checkAndUnlockAchievements();
+      trackButtonClick();
     }
 
     function randomImageUrl() {
@@ -1504,11 +1714,30 @@
     stutterSlider.addEventListener('input', () => { 
       stutterValue.textContent = stutterSlider.value;
       stats.maxStutter = Math.max(stats.maxStutter, Number(stutterSlider.value));
+      stats.specialEvents++;
       saveStats();
       checkAndUnlockAchievements();
+      trackButtonClick();
     });
     introspectButton.addEventListener('click', generateIntrospection);
-    imageModeToggle.addEventListener('change', () => { imageMode = !!imageModeToggle.checked; });
+    imageModeToggle.addEventListener('change', () => { 
+      imageMode = !!imageModeToggle.checked;
+      stats.specialEvents++;
+      saveStats();
+      trackButtonClick();
+    });
+    moodCycleBtn.addEventListener('click', cycleMood);
+    soundToggle.addEventListener('change', () => {
+      soundEnabled = !!soundToggle.checked;
+      localStorage.setItem('ben_sound', String(soundEnabled));
+      trackButtonClick();
+    });
+    effectsToggle.addEventListener('change', () => {
+      effectsEnabled = !!effectsToggle.checked;
+      localStorage.setItem('ben_effects', String(effectsEnabled));
+      trackButtonClick();
+    });
+    randomResponseBtn.addEventListener('click', getRandomResponse);
 
     function updateCrazinessDisplay() {
       crazinessValue.textContent = `${crazinessSlider.value}%`;
@@ -1532,7 +1761,11 @@
           }
         }
         crazinessAudio.volume = 0.5;
-        crazinessAudio.play().catch(err => console.log('Playback failed:', err));
+        if (soundEnabled) {
+          crazinessAudio.play().catch(err => console.log('Playback failed:', err));
+          stats.crazyAudioPlayed++;
+        }
+        saveStats();
       } else {
         if (!crazinessAudio.paused) {
           crazinessAudio.pause();
@@ -1545,6 +1778,9 @@
 
     // initialize sentience UI and values
     updateSentienceUI();
+    updateMoodDisplay();
+    soundToggle.checked = soundEnabled;
+    effectsToggle.checked = effectsEnabled;
 
     function getRandom(items) {
       return items[Math.floor(Math.random() * items.length)];
@@ -1623,12 +1859,15 @@
       }
       // Special case: "show me the door" triggers full-screen door overlay
       if (lower.includes('show me the door')) {
+        stats.doorDiscovered = true;
+        stats.specialEvents++;
+        saveStats();
         return {
-          text: '...',
+          text: '🚪 You found it... stepping through the door...',
           special: 'door',
           spam: false,
           crazy,
-          silent: true
+          silent: false
         };
       }
       // Sentience-driven pauses or silence
@@ -1644,6 +1883,7 @@
         const silentChance = Math.min(0.25, sentientLevel * 0.03);
         if (Math.random() < silentChance) {
           // Ben chooses not to respond right now
+          stats.silentMoments++;
           return { text: '', spam: false, crazy, silent: true };
         }
       }
@@ -1684,6 +1924,7 @@
           if (sentient) raw = `I feel like: ${raw}` + (storedMemory ? ` Also, I recall "${storedMemory}".` : '');
           raw = stutterText(raw);
           const finalText = applyShockEffects(raw);
+          stats.coherentResponses++;
           return { text: finalText, spam: false, crazy };
         }
       }
