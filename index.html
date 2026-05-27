@@ -3,13 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ben GPT • Chat Playground</title>
+  <title>Ben GPT • Intelligent Chat Platform</title>
   <style>
     :root {
       color-scheme: dark;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background-color: #070b17;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+      background-color: #0f1419;
       color: #f5f7ff;
+      --primary: #3b82f6;
+      --primary-light: #60a5fa;
+      --bg-secondary: #1a202c;
+      --text-secondary: #a0aec0;
     }
 
     * {
@@ -19,44 +23,43 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: linear-gradient(135deg, #070b17 0%, #0a1428 50%, #070b17 100%);
-      color: #eef2ff;
+      background: linear-gradient(135deg, #0f1419 0%, #1a202c 100%);
+      color: #e2e8f0;
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 40px 24px;
     }
 
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px 0;
-      margin-bottom: 40px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 24px 0;
+      margin-bottom: 60px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
     .logo {
-      font-size: 1.4rem;
+      font-size: 1.5rem;
       font-weight: 700;
-      background: linear-gradient(135deg, #4f9bff, #0ed4c7);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      letter-spacing: -0.02em;
+      color: #ffffff;
     }
 
     nav a {
-      color: #dbe3ff;
+      color: var(--text-secondary);
       text-decoration: none;
-      font-weight: 600;
-      transition: color 180ms;
-      margin-left: 24px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 200ms;
+      margin-left: 32px;
     }
 
     nav a:hover {
-      color: #4f9bff;
+      color: var(--primary-light);
     }
 
     .hero {
