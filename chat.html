@@ -767,7 +767,7 @@
       <div class="try-ask">
         <p>Try asking this:</p>
         <div class="suggestions" id="suggestionList">
-          <button type="button" class="suggestion-button">Why is the Samsung Galaxy 10000000000 eating vegan meat?</button>
+          <button type="button" class="suggestion-button">What is a black hole made of?</button>
           <button type="button" class="suggestion-button">What if a fart powered an astronaut spaceship?</button>
           <button type="button" class="suggestion-button">How can diarrhea and Alzhimers make a rainbow story?</button>
         </div>
@@ -1703,6 +1703,37 @@
       return `https://picsum.photos/seed/${seed}/640/360`;
     }
 
+    function buildSearchImageUrl(query) {
+      const encoded = encodeURIComponent(query.trim());
+      return `https://loremflickr.com/640/360/${encoded}?random=${Date.now()}`;
+    }
+
+    async function fetchWikiSummary(query) {
+      const encoded = encodeURIComponent(query.trim());
+      const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encoded}`;
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.extract) {
+          return data.extract;
+        }
+        if (data.title && data.description) {
+          return `${data.title}: ${data.description}`;
+        }
+        return `I couldn't find a solid summary for "${query}".`;
+      } catch (error) {
+        console.warn('Wiki search failed', error);
+        return `I couldn't look that up right now, but I can still chat about "${query}".`;
+      }
+    }
+
+    function isWhatIsQuery(text) {
+      return /^\s*what is\b/i.test(text);
+    }
+
     updateShockDisplay();
 
     panelToggle.addEventListener('click', togglePanel);
@@ -1845,9 +1876,32 @@
       return result;
     }
 
-    function getBotReply(userText) {
+    async function getBotReply(userText) {
       const crazy = Number(crazinessSlider.value) / 100;
       const lower = userText.toLowerCase();
+
+      if (isWhatIsQuery(userText)) {
+        const query = userText.trim().replace(/^what is\s+/i, '').trim();
+        if (query) {
+          if (imageMode) {
+            return {
+              text: `Image search for "${query}"`,
+              image: buildSearchImageUrl(query),
+              spam: false,
+              crazy,
+              special: 'searchImage'
+            };
+          }
+          const summary = await fetchWikiSummary(query);
+          const caption = sentient ? stutterText(`I searched it up: ${summary}`) : `Search result: ${summary}`;
+          return {
+            text: caption,
+            spam: false,
+            crazy,
+            special: 'search'
+          };
+        }
+      }
 
       if (/\baw shucks\b/.test(lower) || /\bawshucks\b/.test(lower)) {
         return {
@@ -2041,7 +2095,7 @@
       }
     }
 
-    function sendMessage() {
+    async function sendMessage() {
       const text = chatInput.value.trim();
       if (!text) return;
       
@@ -2090,7 +2144,7 @@
 
       chatInput.value = '';
       const typingBubble = appendMessage('Ben GPT is typing...', 'bot');
-      const reply = getBotReply(text);
+      const reply = await getBotReply(text);
       const showPenguinVideo = reply.special === 'penguin';
       const showImage = !!reply.image;
       const typeSpeed = reply.spam ? Math.max(2, 10 - reply.crazy * 6) : Math.max(6, 20 - reply.crazy * 12);
