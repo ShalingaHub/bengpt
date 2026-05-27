@@ -1705,8 +1705,35 @@
 
     function buildGoogleImageSearchUrl(query) {
       const encoded = encodeURIComponent(query.trim());
-      // Use Unsplash's simple API which returns direct image URLs with no auth required
-      return `https://source.unsplash.com/640x360/?${encoded}`;
+      return encoded;
+    }
+
+    async function fetchImageFromDuckDuckGo(query) {
+      try {
+        const encoded = encodeURIComponent(query.trim());
+        const response = await fetch(`https://api.duckduckgo.com/?q=${encoded}&format=json&no_html=1`);
+        const data = await response.json();
+        
+        // Try to get image from instant answer
+        if (data.Image) {
+          return data.Image;
+        }
+        
+        // Try related topics for images
+        if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+          for (let topic of data.RelatedTopics) {
+            if (topic.Icon && topic.Icon.URL) {
+              return 'https://duckduckgo.com' + topic.Icon.URL;
+            }
+          }
+        }
+        
+        // Fallback to LoremFlickr if DDG doesn't have image
+        return `https://loremflickr.com/640/360/${encoded}?random=${Date.now()}`;
+      } catch (error) {
+        console.warn('Image fetch failed', error);
+        return `https://loremflickr.com/640/360/${query}?random=${Date.now()}`;
+      }
     }
 
     async function fetchWikiSummary(query) {
@@ -1885,9 +1912,10 @@
         const query = userText.trim().replace(/^what is\s+/i, '').trim();
         if (query) {
           if (imageMode) {
+            const imageUrl = await fetchImageFromDuckDuckGo(query);
             return {
               text: `Image search for "${query}"`,
-              image: buildGoogleImageSearchUrl(query),
+              image: imageUrl,
               googleImage: true,
               spam: false,
               crazy,
@@ -1944,12 +1972,12 @@
         }
       }
 
-      // Image mode: return a Google image search link instead of text occasionally
+      // Image mode: return a image search result instead of text occasionally
       if (imageMode && Math.random() < 0.6) {
         const imageQuery = userText.trim() || 'strange picture';
-        const url = buildGoogleImageSearchUrl(imageQuery);
-        const caption = sentient ? stutterText('I found this on Google Images...') : 'Google Images result:';
-        return { text: caption, image: url, googleImage: true, spam: false, crazy };
+        const imageUrl = await fetchImageFromDuckDuckGo(imageQuery);
+        const caption = sentient ? stutterText('I found this...') : 'Search result:';
+        return { text: caption, image: imageUrl, googleImage: true, spam: false, crazy };
       }
       // Special case: exact phrase (case-insensitive) triggers low-quality penguin video
       if (lower === 'i just hit the jackpot') {
