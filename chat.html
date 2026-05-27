@@ -1705,7 +1705,8 @@
 
     function buildGoogleImageSearchUrl(query) {
       const encoded = encodeURIComponent(query.trim());
-      return `https://www.google.com/search?tbm=isch&q=${encoded}`;
+      // Use Unsplash's simple API which returns direct image URLs with no auth required
+      return `https://source.unsplash.com/640x360/?${encoded}`;
     }
 
     async function fetchWikiSummary(query) {
@@ -2195,13 +2196,16 @@
           }
           if (showImage) {
             if (reply.googleImage) {
-              const link = document.createElement('a');
-              link.href = reply.image;
-              link.target = '_blank';
-              link.rel = 'noreferrer noopener';
-              link.textContent = 'Open Google Images result';
-              link.style.cssText = 'display:inline-block;margin-top:12px;padding:14px 16px;border-radius:14px;background:rgba(79,155,255,0.12);color:#cfe7ff;text-decoration:none;font-weight:700;';
-              typingBubble.appendChild(link);
+              const img = document.createElement('img');
+              img.src = reply.image;
+              img.style.width = '100%';
+              img.style.marginTop = '12px';
+              img.style.borderRadius = '12px';
+              img.alt = 'Search result image';
+              img.onerror = () => {
+                img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="640" height="360"%3E%3Crect fill="%23333" width="640" height="360"/%3E%3Ctext x="50%25" y="50%25" fill="%23999" text-anchor="middle" dy=".3em"%3EImage not available%3C/text%3E%3C/svg%3E';
+              };
+              typingBubble.appendChild(img);
             } else {
               const img = document.createElement('img');
               img.src = reply.image;
