@@ -1703,35 +1703,35 @@
       return `https://picsum.photos/seed/${seed}/640/360`;
     }
 
-    function buildGoogleImageSearchUrl(query) {
-      const encoded = encodeURIComponent(query.trim());
-      return encoded;
-    }
-
-    async function fetchImageFromDuckDuckGo(query) {
+    async function fetchImageFromWikimedia(query) {
       try {
         const encoded = encodeURIComponent(query.trim());
-        const response = await fetch(`https://api.duckduckgo.com/?q=${encoded}&format=json&no_html=1`);
+        // Search Wikimedia Commons for images
+        const response = await fetch(
+          `https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${encoded}&srnamespace=6&format=json&origin=*`
+        );
         const data = await response.json();
         
-        // Try to get image from instant answer
-        if (data.Image) {
-          return data.Image;
-        }
-        
-        // Try related topics for images
-        if (data.RelatedTopics && data.RelatedTopics.length > 0) {
-          for (let topic of data.RelatedTopics) {
-            if (topic.Icon && topic.Icon.URL) {
-              return 'https://duckduckgo.com' + topic.Icon.URL;
-            }
+        if (data.query && data.query.search && data.query.search.length > 0) {
+          // Get the first result
+          const firstResult = data.query.search[0].title;
+          // Fetch file info to get the actual image URL
+          const fileResponse = await fetch(
+            `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(firstResult)}&prop=imageinfo&iiprop=url&format=json&origin=*`
+          );
+          const fileData = await fileResponse.json();
+          const pages = fileData.query.pages;
+          const page = Object.values(pages)[0];
+          
+          if (page.imageinfo && page.imageinfo[0] && page.imageinfo[0].url) {
+            return page.imageinfo[0].url;
           }
         }
         
-        // Fallback to LoremFlickr if DDG doesn't have image
+        // Fallback to LoremFlickr
         return `https://loremflickr.com/640/360/${encoded}?random=${Date.now()}`;
       } catch (error) {
-        console.warn('Image fetch failed', error);
+        console.warn('Wikimedia image fetch failed', error);
         return `https://loremflickr.com/640/360/${query}?random=${Date.now()}`;
       }
     }
@@ -1912,7 +1912,7 @@
         const query = userText.trim().replace(/^what is\s+/i, '').trim();
         if (query) {
           if (imageMode) {
-            const imageUrl = await fetchImageFromDuckDuckGo(query);
+            const imageUrl = await fetchImageFromWikimedia(query);
             return {
               text: `Image search for "${query}"`,
               image: imageUrl,
@@ -1975,7 +1975,7 @@
       // Image mode: return a image search result instead of text occasionally
       if (imageMode && Math.random() < 0.6) {
         const imageQuery = userText.trim() || 'strange picture';
-        const imageUrl = await fetchImageFromDuckDuckGo(imageQuery);
+        const imageUrl = await fetchImageFromWikimedia(imageQuery);
         const caption = sentient ? stutterText('I found this...') : 'Search result:';
         return { text: caption, image: imageUrl, googleImage: true, spam: false, crazy };
       }
