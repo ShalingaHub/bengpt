@@ -564,7 +564,47 @@
     .control-panel.open {
       transform: translate(0, -50%);
     }
-    
+
+    .panel-lock-screen {
+      position: absolute;
+      inset: 0;
+      background: rgba(6, 10, 20, 0.96);
+      display: grid;
+      place-items: center;
+      border-radius: 24px 0 0 24px;
+      z-index: 12000;
+      padding: 20px;
+    }
+
+    .locked-feature {
+      opacity: 0.48;
+      pointer-events: none;
+      position: relative;
+    }
+
+    .unlock-button {
+      width: 100%;
+      margin-top: 8px;
+      background: linear-gradient(135deg, #4f9bff, #0ed4c7);
+      color: #070b17;
+      border: none;
+      padding: 12px 14px;
+      border-radius: 16px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .unlock-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(79, 155, 255, 0.2);
+    }
+
+    .unlock-note {
+      font-size: 0.88rem;
+      color: #a8b7ff;
+      margin-top: 6px;
+    }
+
     .control-panel::-webkit-scrollbar {
       width: 6px;
     }
@@ -748,6 +788,7 @@
       <nav class="nav-links">
         <a href="index.html">Home</a>
         <a href="chat.html">Chat</a>
+        <span id="moneyDisplay" style="font-weight:700;color:#ffd76b;">Balance: $0</span>
       </nav>
     </div>
   </header>
@@ -774,7 +815,8 @@
       </div>
       <div class="crazy-control">
         <label for="crazinessSlider">Craziness: <span id="crazinessValue">50%</span></label>
-        <input id="crazinessSlider" class="crazy-slider" type="range" min="0" max="100" value="50" />
+        <input id="crazinessSlider" class="crazy-slider" type="range" min="0" max="100" value="50" disabled />
+        <button type="button" class="reset-button" id="unlockCrazinessButton" style="margin-top:10px;">Unlock Craziness for $25,000</button>
       </div>
     </section>
   </main>
@@ -782,6 +824,13 @@
     <div class="panel-header">
       <span>⚙️ Control Panel</span>
       <button class="panel-close" id="panelClose" aria-label="Close control panel">×</button>
+    </div>
+    <div class="panel-lock-screen" id="panelLockScreen">
+      <div style="text-align:center;max-width:280px;">
+        <p style="margin:0 0 12px;font-size:1rem;font-weight:700;color:#ffd76b;">Control Panel Locked</p>
+        <p style="margin:0 0 18px;color:#a8b7ff;font-size:0.92rem;line-height:1.4;">You need $15,000 to unlock the control panel and start buying upgrades. Every letter Ben says earns you money!</p>
+        <button type="button" class="electrocute-button" id="unlockPanelButton" style="width:100%;">Unlock Control Panel for $15,000</button>
+      </div>
     </div>
     <div class="panel-body">
       <!-- Shock Controls -->
@@ -801,8 +850,10 @@
           <button id="moodCycleBtn" class="reset-button" style="flex:1;padding:8px;font-size:0.9rem;">Cycle Mood</button>
           <span id="moodDisplay" style="font-weight:700;color:#ffd76b;">😐</span>
         </div>
+        <button type="button" class="unlock-button" id="unlockMoodButton">Unlock Mood Controls for $2,500</button>
         <div style="font-size:0.85rem;color:#a8b7ff;">Stutter: <strong id="stutterValue">0</strong></div>
         <input id="stutterSlider" type="range" min="0" max="10" value="0" style="width:100%;margin-top:4px;" />
+        <button type="button" class="unlock-button" id="unlockStutterButton">Unlock Stutter for $3,000</button>
       </div>
 
       <!-- Sentience -->
@@ -814,6 +865,7 @@
         <div style="height:6px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden;">
           <div id="sentientBar" style="width:0%;height:100%;background:linear-gradient(90deg,#ff6b9a,#ff9bff);transition:width 200ms ease;"></div>
         </div>
+        <button type="button" class="unlock-button" id="unlockSentienceButton">Unlock Sentience for $5,000</button>
         <small class="panel-hint" style="display:block;margin-top:6px;">Level: <strong id="sentientLevel">0</strong>/10</small>
       </div>
 
@@ -824,6 +876,7 @@
           <input id="memoryInput" placeholder="Type..." style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:inherit;font-size:0.9rem;" />
           <button id="implantMemoryButton" class="reset-button" style="padding:8px 12px;font-size:0.9rem;">Implant</button>
         </div>
+        <button type="button" class="unlock-button" id="unlockMemoryButton">Unlock Memory Implant for $2,000</button>
       </div>
 
       <!-- Power Buttons -->
@@ -831,13 +884,15 @@
         <button id="introspectButton" class="electrocute-button" style="padding:10px;font-size:0.9rem;min-height:40px;">🤔 Ponder</button>
         <button id="randomResponseBtn" class="electrocute-button" style="padding:10px;font-size:0.9rem;min-height:40px;">🎲 Random</button>
       </div>
+      <button type="button" class="unlock-button" id="unlockControlFeaturesButton">Unlock Control Features for $8,000</button>
 
       <!-- Fun Toggles -->
       <div style="display:grid;gap:8px;">
         <div style="display:flex;gap:8px;align-items:center;">
-          <input id="imageModeToggle" type="checkbox" style="cursor:pointer;" />
+          <input id="imageModeToggle" type="checkbox" style="cursor:pointer;" disabled />
           <label class="panel-note" for="imageModeToggle" style="margin:0;cursor:pointer;font-size:0.9rem;">🖼️ Image Mode</label>
         </div>
+        <button type="button" class="unlock-button" id="unlockImageModeButton">Unlock Image Mode for $3,200</button>
         <div style="display:flex;gap:8px;align-items:center;">
           <input id="soundToggle" type="checkbox" checked style="cursor:pointer;" />
           <label class="panel-note" for="soundToggle" style="margin:0;cursor:pointer;font-size:0.9rem;">🔊 Sound Effects</label>
@@ -1031,11 +1086,57 @@
         name: 'Dictionary Master',
         emoji: '📕',
         desc: 'Use 20 different wild words in messages',
-        condition: () => stats.uniqueWildcards >= 20,
-        progress: () => `${stats.uniqueWildcards} / 20`,
+        condition: () => stats.uniqueWildcards.size >= 20,
+        progress: () => `${stats.uniqueWildcards.size} / 20`,
         group: 'fun'
       }
     };
+
+    const ACHIEVEMENT_REWARDS = {
+      first_message: 100,
+      chat_master: 200,
+      conversation_legend: 500,
+      wildcard_master: 120,
+      question_asker: 140,
+      crazy_mode_user: 220,
+      long_message: 110,
+      first_shock: 80,
+      serial_shocker: 180,
+      max_electrocute: 320,
+      stutter_addict: 150,
+      sentience_seeker: 450,
+      memory_implanter: 170,
+      introspection_master: 210,
+      penguin_watcher: 190,
+      image_explorer: 220,
+      spam_listener: 160,
+      response_collector: 280,
+      combo_master: 140,
+      all_wild_words: 260,
+      door_discovery: 420,
+      zen_master: 230,
+      control_freak: 300,
+      mood_master: 260,
+      chaos_engineer: 340,
+      button_masher: 170,
+      music_lover: 210,
+      golden_tongue: 240,
+      glitch_collector: 230
+    };
+
+    const FEATURE_COSTS = {
+      panel: 1500000,
+      craziness: 2500000,
+      mood: 250000,
+      stutter: 300000,
+      sentience: 500000,
+      memory: 200000,
+      introspect: 250000,
+      random: 220000,
+      imageMode: 320000,
+      controlFeatures: 800000
+    };
+
 
     let stats = {
       messagesCount: 0,
@@ -1055,7 +1156,19 @@
       maxCombo: 0,
       currentCombo: 0,
       uniqueWildcards: new Set(),
-      unlockedAchievements: new Set()
+      unlockedAchievements: new Set(),
+      money: 0,
+      panelUnlocked: false,
+      crazinessUnlocked: false,
+      moodUnlocked: false,
+      stutterUnlocked: false,
+      sentienceUnlocked: false,
+      memoryUnlocked: false,
+      introspectUnlocked: false,
+      randomUnlocked: false,
+      imageModeUnlocked: false,
+      controlUpgradesPurchased: false,
+      usedButtons: new Set()
     };
 
     function loadStats() {
@@ -1069,6 +1182,9 @@
         if (data.unlockedAchievements) {
           stats.unlockedAchievements = new Set(data.unlockedAchievements);
         }
+        if (data.usedButtons) {
+          stats.usedButtons = new Set(data.usedButtons);
+        }
       }
     }
 
@@ -1076,13 +1192,44 @@
       const data = { ...stats };
       data.uniqueWildcards = Array.from(stats.uniqueWildcards);
       data.unlockedAchievements = Array.from(stats.unlockedAchievements);
+      data.usedButtons = Array.from(stats.usedButtons || []);
       localStorage.setItem('bengpt_stats', JSON.stringify(data));
     }
 
+    function formatMoney(cents) {
+      return `$${(cents / 100).toFixed(2).replace(/\.00$/, '')}`;
+    }
+
+    function updateMoneyDisplay() {
+      const display = document.getElementById('moneyDisplay');
+      if (display) {
+        display.textContent = `Balance: ${formatMoney(stats.money)}`;
+      }
+    }
+
+    function awardMoney(cents, reason) {
+      if (!cents) return;
+      stats.money += cents;
+      saveStats();
+      updateMoneyDisplay();
+      if (reason) {
+        showGameToast(`+${formatMoney(cents)} earned! ${reason}`);
+      }
+    }
+
+    function showGameToast(text) {
+      const toast = document.createElement('div');
+      toast.className = 'fun-fact';
+      toast.textContent = text;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
     function showAchievementPopup(achievement) {
+      const rewardLabel = achievement.reward ? `<div style="margin-top:8px;font-size:.82rem;opacity:.9;">+${formatMoney(achievement.reward)} bonus</div>` : '';
       const popup = document.createElement('div');
       popup.className = 'achievement-popup';
-      popup.innerHTML = `<div class="achievement-icon">${achievement.emoji}</div><div><strong>${achievement.name}</strong><br><span style="font-size:.85rem;opacity:.8;">${achievement.desc}</span></div>`;
+      popup.innerHTML = `<div class="achievement-icon">${achievement.emoji}</div><div><strong>${achievement.name}</strong><br><span style="font-size:.85rem;opacity:.8;">${achievement.desc}</span>${rewardLabel}</div>`;
       document.body.appendChild(popup);
       
       // Add celebration emojis
@@ -1107,7 +1254,11 @@
       Object.entries(ACHIEVEMENTS).forEach(([key, achievement]) => {
         if (!stats.unlockedAchievements.has(key) && achievement.condition()) {
           stats.unlockedAchievements.add(key);
-          showAchievementPopup(achievement);
+          const reward = ACHIEVEMENT_REWARDS[key] || 0;
+          if (reward) {
+            awardMoney(reward, `Achievement: ${achievement.name}`);
+          }
+          showAchievementPopup({ ...achievement, reward });
           anyUnlocked = true;
         }
       });
@@ -1131,10 +1282,11 @@
         const isUnlocked = stats.unlockedAchievements.has(key);
         const item = document.createElement('div');
         item.className = `achievement-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+        const rewardValue = ACHIEVEMENT_REWARDS[key] ? `+${formatMoney(ACHIEVEMENT_REWARDS[key])}` : '';
         item.innerHTML = `
           <div class="achievement-emoji">${achievement.emoji}</div>
           <div class="achievement-info">
-            <div class="achievement-name">${achievement.name}</div>
+            <div class="achievement-name">${achievement.name} ${rewardValue ? `<span style="font-size:.8rem;opacity:.7;">(${rewardValue})</span>` : ''}</div>
             <div class="achievement-desc">${achievement.desc}</div>
             <div class="achievement-progress">${achievement.progress()}</div>
           </div>
@@ -1255,10 +1407,98 @@
       achievementsPanel.classList.remove('open');
     });
 
+    const panelLockScreen = document.getElementById('panelLockScreen');
+    const unlockPanelButton = document.getElementById('unlockPanelButton');
+    const unlockCrazinessButton = document.getElementById('unlockCrazinessButton');
+    const unlockMoodButton = document.getElementById('unlockMoodButton');
+    const unlockStutterButton = document.getElementById('unlockStutterButton');
+    const unlockSentienceButton = document.getElementById('unlockSentienceButton');
+    const unlockMemoryButton = document.getElementById('unlockMemoryButton');
+    const unlockControlFeaturesButton = document.getElementById('unlockControlFeaturesButton');
+    const unlockImageModeButton = document.getElementById('unlockImageModeButton');
+
+    function canAfford(cost) {
+      return stats.money >= cost;
+    }
+
+    function purchaseFeature(key, cost, message) {
+      if (!canAfford(cost)) {
+        showGameToast(`You need ${formatMoney(cost)} for this upgrade.`);
+        return false;
+      }
+      stats.money -= cost;
+      stats[key] = true;
+      saveStats();
+      updateMoneyDisplay();
+      updateUnlockUI();
+      showGameToast(message);
+      return true;
+    }
+
+    function updateUnlockUI() {
+      panelLockScreen.style.display = stats.panelUnlocked ? 'none' : 'grid';
+      panelToggle.textContent = stats.panelUnlocked ? '»' : '🔒';
+      unlockPanelButton.disabled = stats.panelUnlocked;
+      unlockCrazinessButton.disabled = stats.crazinessUnlocked;
+      unlockMoodButton.disabled = stats.moodUnlocked;
+      unlockStutterButton.disabled = stats.stutterUnlocked;
+      unlockSentienceButton.disabled = stats.sentienceUnlocked;
+      unlockMemoryButton.disabled = stats.memoryUnlocked;
+      unlockControlFeaturesButton.disabled = stats.introspectUnlocked && stats.randomUnlocked;
+      unlockImageModeButton.disabled = stats.imageModeUnlocked;
+
+      crazinessSlider.disabled = !stats.crazinessUnlocked;
+      stutterSlider.disabled = !stats.stutterUnlocked;
+      moodCycleBtn.disabled = !stats.moodUnlocked;
+      sentienceToggle.disabled = !stats.sentienceUnlocked;
+      memoryInput.disabled = !stats.memoryUnlocked;
+      implantMemoryButton.disabled = !stats.memoryUnlocked;
+      introspectButton.disabled = !stats.introspectUnlocked;
+      randomResponseBtn.disabled = !stats.randomUnlocked;
+      imageModeToggle.disabled = !stats.imageModeUnlocked;
+      updateCrazinessDisplay();
+      if (!stats.panelUnlocked) {
+        controlPanel.classList.remove('open');
+      }
+    }
+
+    function unlockAllControlFeatures() {
+      const didUnlock = purchaseFeature('introspectUnlocked', FEATURE_COSTS.controlFeatures, 'Control features unlocked! Ponder and random buttons are now active.');
+      if (didUnlock) {
+        stats.randomUnlocked = true;
+        saveStats();
+        updateUnlockUI();
+      }
+    }
+
+    unlockPanelButton.addEventListener('click', () => {
+      purchaseFeature('panelUnlocked', FEATURE_COSTS.panel, 'Control panel is now unlocked!');
+    });
+    unlockCrazinessButton.addEventListener('click', () => {
+      purchaseFeature('crazinessUnlocked', FEATURE_COSTS.craziness, 'Craziness mode is live!');
+    });
+    unlockMoodButton.addEventListener('click', () => {
+      purchaseFeature('moodUnlocked', FEATURE_COSTS.mood, 'Mood controls unlocked. Let the feelings flow!');
+    });
+    unlockStutterButton.addEventListener('click', () => {
+      purchaseFeature('stutterUnlocked', FEATURE_COSTS.stutter, 'Stutter unlocked. Say it like a glitch monster.');
+    });
+    unlockSentienceButton.addEventListener('click', () => {
+      purchaseFeature('sentienceUnlocked', FEATURE_COSTS.sentience, 'Sentience unlocked. Ben is now thinking harder.');
+    });
+    unlockMemoryButton.addEventListener('click', () => {
+      purchaseFeature('memoryUnlocked', FEATURE_COSTS.memory, 'Memory implant unlocked. Add weird memories now.');
+    });
+    unlockControlFeaturesButton.addEventListener('click', unlockAllControlFeatures);
+    unlockImageModeButton.addEventListener('click', () => {
+      purchaseFeature('imageModeUnlocked', FEATURE_COSTS.imageMode, 'Image Mode unlocked. Picture chaos incoming.');
+    });
+
     const comboCounter = document.getElementById('comboCounter');
 
     const funFacts = [
       '🎲 Every 5 messages in a row is a COMBO!',
+      '💰 Every letter Ben writes gives you money, so make him talk a lot!',
       '⚡ Electrocute Ben to unlock shock achievements!',
       '🧠 Enable sentience for philosophical responses!',
       '💾 Implant memories to change how Ben talks!',
@@ -1749,6 +1989,10 @@
       return /^\s*what is\b/i.test(text);
     }
 
+    loadStats();
+    updateMoneyDisplay();
+    updateAchievementsUI();
+    updateUnlockUI();
     updateShockDisplay();
 
     panelToggle.addEventListener('click', togglePanel);
@@ -1786,6 +2030,11 @@
     randomResponseBtn.addEventListener('click', getRandomResponse);
 
     function updateCrazinessDisplay() {
+      if (!stats.crazinessUnlocked) {
+        crazinessValue.textContent = 'Locked';
+        crazinessSlider.disabled = true;
+        return;
+      }
       crazinessValue.textContent = `${crazinessSlider.value}%`;
       const craziness = Number(crazinessSlider.value);
 
@@ -2232,6 +2481,10 @@
             }
           }
           checkAndUnlockAchievements();
+          const earnedLetters = (reply.text.match(/[A-Za-z]/g) || []).length;
+          if (earnedLetters) {
+            awardMoney(earnedLetters, 'Letter payout from Ben GPT');
+          }
         });
         if (reply.spam) {
           const glitchDuration = 6200 + (reply.crazy || 0.5) * 3200;
