@@ -573,7 +573,15 @@
       place-items: center;
       border-radius: 24px 0 0 24px;
       z-index: 12000;
+      /* Allow clicks to pass through the overlay so chat input remains usable
+         while still keeping panel controls clickable. */
+      pointer-events: none;
       padding: 20px;
+    }
+
+    /* Make children (buttons/inputs) inside the lock screen receive events */
+    .panel-lock-screen * {
+      pointer-events: auto;
     }
 
     .locked-feature {
@@ -879,6 +887,17 @@
         <button type="button" class="unlock-button" id="unlockMemoryButton">Unlock Memory Implant for $2,000</button>
       </div>
 
+      <!-- User Dictionary -->
+      <div style="background:rgba(155,107,255,0.06);border:1px solid rgba(155,107,255,0.12);border-radius:12px;padding:12px;">
+        <p class="panel-note" style="margin:0 0 8px;">📚 User Dictionary</p>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+          <input id="addWordInput" placeholder="Enter a word..." style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:inherit;font-size:0.9rem;" />
+          <button id="addWordButton" class="unlock-button" style="padding:8px 12px;font-size:0.9rem;">Buy Word ($100)</button>
+        </div>
+        <div id="userDictionaryList" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
+        <div style="font-size:0.82rem;color:#a8b7ff;margin-top:8px;">Purchased words are added to Ben's vocabulary and increase his randomness and callbacks.</div>
+      </div>
+
       <!-- Power Buttons -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <button id="introspectButton" class="electrocute-button" style="padding:10px;font-size:0.9rem;min-height:40px;">🤔 Ponder</button>
@@ -1137,6 +1156,9 @@
       controlFeatures: 800000
     };
 
+    // Cost to add a custom dictionary word (in cents)
+    const WORD_COST = 10000; // $100
+
 
     let stats = {
       messagesCount: 0,
@@ -1157,6 +1179,7 @@
       currentCombo: 0,
       uniqueWildcards: new Set(),
       unlockedAchievements: new Set(),
+      userDictionary: new Set(),
       money: 0,
       panelUnlocked: false,
       crazinessUnlocked: false,
@@ -1185,6 +1208,9 @@
         if (data.usedButtons) {
           stats.usedButtons = new Set(data.usedButtons);
         }
+        if (data.userDictionary) {
+          stats.userDictionary = new Set(data.userDictionary);
+        }
       }
     }
 
@@ -1193,6 +1219,7 @@
       data.uniqueWildcards = Array.from(stats.uniqueWildcards);
       data.unlockedAchievements = Array.from(stats.unlockedAchievements);
       data.usedButtons = Array.from(stats.usedButtons || []);
+      data.userDictionary = Array.from(stats.userDictionary || []);
       localStorage.setItem('bengpt_stats', JSON.stringify(data));
     }
 
@@ -1489,6 +1516,78 @@
     unlockMemoryButton.addEventListener('click', () => {
       purchaseFeature('memoryUnlocked', FEATURE_COSTS.memory, 'Memory implant unlocked. Add weird memories now.');
     });
+    
+    // Helper: return combined list of user dictionary words + built-in wildWords
+    function getAllWildWords() {
+      const userWords = Array.from(stats.userDictionary || []);
+      return userWords.concat(wildWords);
+    }
+
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function updateWordListUI() {
+      const list = document.getElementById('userDictionaryList');
+      if (!list) return;
+      list.innerHTML = '';
+      Array.from(stats.userDictionary || []).forEach(w => {
+        const chip = document.createElement('div');
+        chip.style.cssText = 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.04);padding:6px 8px;border-radius:12px;display:flex;gap:8px;align-items:center;';
+        const span = document.createElement('span');
+        span.textContent = w;
+        span.style.opacity = '0.95';
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = '×';
+        removeBtn.style.cssText = 'background:transparent;border:0;color:#ff9b9b;cursor:pointer;font-weight:700;padding:2px 6px;border-radius:8px;';
+        removeBtn.addEventListener('click', () => {
+          stats.userDictionary.delete(w);
+          saveStats();
+          updateWordListUI();
+          showGameToast(`${w} removed from dictionary.`);
+        });
+        chip.appendChild(span);
+        chip.appendChild(removeBtn);
+        list.appendChild(chip);
+      });
+    }
+
+    function purchaseWord(word) {
+      if (!word) return;
+      const normalized = word.trim();
+      if (!normalized) return;
+      if (stats.userDictionary && stats.userDictionary.has(normalized)) {
+        showGameToast(`${normalized} is already in your dictionary.`);
+        return false;
+      }
+      if (!canAfford(WORD_COST)) {
+        showGameToast(`You need ${formatMoney(WORD_COST)} to add a new word.`);
+        return false;
+      }
+      stats.money -= WORD_COST;
+      stats.userDictionary.add(normalized);
+      saveStats();
+      updateMoneyDisplay();
+      updateWordListUI();
+      showGameToast(`Added "${normalized}" to Ben's dictionary!`);
+      return true;
+    }
+
+    // Wire up add word UI
+    const addWordInput = document.getElementById('addWordInput');
+    const addWordButton = document.getElementById('addWordButton');
+    if (addWordButton) {
+      addWordButton.addEventListener('click', () => {
+        const val = addWordInput.value.trim();
+        if (!val) return;
+        if (purchaseWord(val)) {
+          addWordInput.value = '';
+        }
+      });
+    }
+
+    // Initialize word list UI on load
+    updateWordListUI();
     unlockControlFeaturesButton.addEventListener('click', unlockAllControlFeatures);
     unlockImageModeButton.addEventListener('click', () => {
       purchaseFeature('imageModeUnlocked', FEATURE_COSTS.imageMode, 'Image Mode unlocked. Picture chaos incoming.');
@@ -1993,6 +2092,7 @@
     updateMoneyDisplay();
     updateAchievementsUI();
     updateUnlockUI();
+    updateWordListUI();
     updateShockDisplay();
 
     panelToggle.addEventListener('click', togglePanel);
@@ -2114,7 +2214,7 @@
       const phrases = [];
       for (let i = 0; i < count; i += 1) {
         const first = getRandom(themeWords);
-        const second = getRandom(wildWords.filter(w => w !== first));
+        const second = getRandom(getAllWildWords().filter(w => w !== first));
         const connector = getRandom(extras);
         phrases.push(`${first} ${connector} ${second}`);
       }
@@ -2225,7 +2325,8 @@
           return { text: finalText, spam: false, crazy, special: 'penguin' };
         }
       }
-      const foundKeywords = wildWords.filter(word => lower.includes(word.toLowerCase()));
+      const combinedWildWords = getAllWildWords();
+      const foundKeywords = combinedWildWords.filter(word => lower.includes(word.toLowerCase()));
       const isSpam = Math.random() < 0.2;
 
       if (isSpam) {
@@ -2257,8 +2358,8 @@
         templateSet = reactionTemplates.mention;
       }
 
-      const firstWord = foundKeywords[0] || getRandom(wildWords);
-      const secondWord = foundKeywords[1] || getRandom(wildWords.filter(w => w !== firstWord));
+      const firstWord = foundKeywords[0] || getRandom(combinedWildWords);
+      const secondWord = foundKeywords[1] || getRandom(combinedWildWords.filter(w => w !== firstWord));
       const template = getRandom(templateSet);
       const reply = template.replace('%s', firstWord).replace('%s', secondWord);
       const longExtra = buildLongReply([firstWord, secondWord], crazy);
@@ -2380,9 +2481,10 @@
         stats.questionsAsked++;
       }
 
-      // Check for wild words
-      wildWords.forEach(word => {
-        if (lowerText.includes(word.toLowerCase())) {
+      // Check for wild words (including user-added dictionary)
+      const combinedWildWordsForScan = getAllWildWords();
+      combinedWildWordsForScan.forEach(word => {
+        if (word && lowerText.includes(word.toLowerCase())) {
           stats.wildcardsUsed++;
           stats.uniqueWildcards.add(word.toLowerCase());
         }
@@ -2483,7 +2585,23 @@
           checkAndUnlockAchievements();
           const earnedLetters = (reply.text.match(/[A-Za-z]/g) || []).length;
           if (earnedLetters) {
-            awardMoney(earnedLetters, 'Letter payout from Ben GPT');
+            // $1 per letter (money stored in cents)
+            awardMoney(earnedLetters * 100, 'Letter payout from Ben GPT');
+          }
+          // Award small bonus when Ben uses words from the user's dictionary
+          const userWords = Array.from(stats.userDictionary || []);
+          if (userWords.length && reply.text) {
+            const replyLower = reply.text.toLowerCase();
+            let matches = 0;
+            userWords.forEach(w => {
+              if (!w) return;
+              const re = new RegExp('\\b' + escapeRegExp(w.toLowerCase()) + '\\b', 'g');
+              matches += (replyLower.match(re) || []).length;
+            });
+            if (matches > 0) {
+              // $5 bonus per matched dictionary word occurrence
+              awardMoney(matches * 500, 'Dictionary usage bonus');
+            }
           }
         });
         if (reply.spam) {
