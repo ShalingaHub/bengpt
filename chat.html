@@ -2043,23 +2043,9 @@
     }
 
     async function fetchImageFromSearch(query) {
-      try {
-        const encoded = encodeURIComponent(query.trim());
-        // Use local proxy server to fetch Google Images
-        const response = await fetch(`http://localhost:3001/search-image?q=${encoded}`);
-        const data = await response.json();
-        
-        if (data.success && data.firstImage) {
-          return data.firstImage;
-        }
-        
-        // Fallback to LoremFlickr if proxy fails
-        return `https://loremflickr.com/800/600/${encoded}?lock=${Math.random()}`;
-      } catch (error) {
-        console.warn('Image fetch failed', error);
-        // Fallback to LoremFlickr
-        return `https://loremflickr.com/800/600/${query}?lock=${Math.random()}`;
-      }
+      const encoded = encodeURIComponent(query.trim());
+      // Use LoremFlickr for relevant images based on search query
+      return `https://loremflickr.com/800/600/${encoded}?lock=${Math.random()}`;
     }
 
     async function fetchWikiSummary(query) {
