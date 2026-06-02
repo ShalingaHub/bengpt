@@ -481,99 +481,249 @@
     });
     World.add(world, [leftWall, rightWall, topWall]);
 
-    // Create the guy (ragdoll character)
+    // Create the guy (ragdoll character with 15 parts)
     function createRagdoll(x, y) {
       const bodies = [];
       const constraints = [];
 
       // Head
-      const head = Bodies.circle(x, y - 60, 20, { 
-        density: 0.01,
+      const head = Bodies.circle(x, y - 140, 30, { 
+        density: 0.005,
+        label: 'guy',
+        restitution: 0.4,
+        friction: 0.6
+      });
+      bodies.push(head);
+
+      // Upper Torso
+      const upperTorso = Bodies.rectangle(x, y - 70, 40, 60, {
+        density: 0.006,
+        label: 'guy',
+        restitution: 0.2,
+        friction: 0.6
+      });
+      bodies.push(upperTorso);
+
+      // Lower Torso
+      const lowerTorso = Bodies.rectangle(x, y, 38, 50, {
+        density: 0.005,
+        label: 'guy',
+        restitution: 0.2,
+        friction: 0.6
+      });
+      bodies.push(lowerTorso);
+
+      // Left Upper Arm
+      const leftUpperArm = Bodies.rectangle(x - 50, y - 65, 18, 50, {
+        density: 0.003,
         label: 'guy',
         restitution: 0.3,
         friction: 0.5
       });
-      bodies.push(head);
+      bodies.push(leftUpperArm);
 
-      // Torso
-      const torso = Bodies.rectangle(x, y - 20, 25, 50, {
+      // Left Forearm
+      const leftForearm = Bodies.rectangle(x - 75, y - 35, 16, 45, {
+        density: 0.002,
+        label: 'guy',
+        restitution: 0.3,
+        friction: 0.5
+      });
+      bodies.push(leftForearm);
+
+      // Left Hand
+      const leftHand = Bodies.circle(x - 85, y - 10, 12, {
+        density: 0.001,
+        label: 'guy',
+        restitution: 0.4,
+        friction: 0.4
+      });
+      bodies.push(leftHand);
+
+      // Right Upper Arm
+      const rightUpperArm = Bodies.rectangle(x + 50, y - 65, 18, 50, {
+        density: 0.003,
+        label: 'guy',
+        restitution: 0.3,
+        friction: 0.5
+      });
+      bodies.push(rightUpperArm);
+
+      // Right Forearm
+      const rightForearm = Bodies.rectangle(x + 75, y - 35, 16, 45, {
+        density: 0.002,
+        label: 'guy',
+        restitution: 0.3,
+        friction: 0.5
+      });
+      bodies.push(rightForearm);
+
+      // Right Hand
+      const rightHand = Bodies.circle(x + 85, y - 10, 12, {
+        density: 0.001,
+        label: 'guy',
+        restitution: 0.4,
+        friction: 0.4
+      });
+      bodies.push(rightHand);
+
+      // Left Upper Leg
+      const leftUpperLeg = Bodies.rectangle(x - 20, y + 50, 20, 55, {
         density: 0.004,
         label: 'guy',
         restitution: 0.2,
-        friction: 0.5
+        friction: 0.6
       });
-      bodies.push(torso);
+      bodies.push(leftUpperLeg);
 
-      // Left arm
-      const leftArm = Bodies.rectangle(x - 35, y - 30, 15, 45, {
-        density: 0.001,
+      // Left Lower Leg
+      const leftLowerLeg = Bodies.rectangle(x - 20, y + 110, 18, 50, {
+        density: 0.003,
         label: 'guy',
-        restitution: 0.1,
-        friction: 0.5
+        restitution: 0.2,
+        friction: 0.6
       });
-      bodies.push(leftArm);
+      bodies.push(leftLowerLeg);
 
-      // Right arm
-      const rightArm = Bodies.rectangle(x + 35, y - 30, 15, 45, {
-        density: 0.001,
-        label: 'guy',
-        restitution: 0.1,
-        friction: 0.5
-      });
-      bodies.push(rightArm);
-
-      // Left leg
-      const leftLeg = Bodies.rectangle(x - 15, y + 35, 15, 45, {
+      // Left Foot
+      const leftFoot = Bodies.rectangle(x - 20, y + 160, 22, 15, {
         density: 0.002,
         label: 'guy',
         restitution: 0.1,
-        friction: 0.5
+        friction: 0.8
       });
-      bodies.push(leftLeg);
+      bodies.push(leftFoot);
 
-      // Right leg
-      const rightLeg = Bodies.rectangle(x + 15, y + 35, 15, 45, {
+      // Right Upper Leg
+      const rightUpperLeg = Bodies.rectangle(x + 20, y + 50, 20, 55, {
+        density: 0.004,
+        label: 'guy',
+        restitution: 0.2,
+        friction: 0.6
+      });
+      bodies.push(rightUpperLeg);
+
+      // Right Lower Leg
+      const rightLowerLeg = Bodies.rectangle(x + 20, y + 110, 18, 50, {
+        density: 0.003,
+        label: 'guy',
+        restitution: 0.2,
+        friction: 0.6
+      });
+      bodies.push(rightLowerLeg);
+
+      // Right Foot
+      const rightFoot = Bodies.rectangle(x + 20, y + 160, 22, 15, {
         density: 0.002,
         label: 'guy',
         restitution: 0.1,
-        friction: 0.5
+        friction: 0.8
       });
-      bodies.push(rightLeg);
+      bodies.push(rightFoot);
 
-      // Constraints (joints)
+      // Create constraints (joints between parts)
+      // Head to upper torso
       constraints.push(Matter.Constraint.create({
         bodyA: head,
-        bodyB: torso,
-        length: 30,
+        bodyB: upperTorso,
+        length: 50,
+        stiffness: 0.9
+      }));
+
+      // Upper torso to lower torso
+      constraints.push(Matter.Constraint.create({
+        bodyA: upperTorso,
+        bodyB: lowerTorso,
+        length: 55,
+        stiffness: 0.85
+      }));
+
+      // Left arm chain
+      constraints.push(Matter.Constraint.create({
+        bodyA: upperTorso,
+        bodyB: leftUpperArm,
+        length: 50,
+        stiffness: 0.75
+      }));
+
+      constraints.push(Matter.Constraint.create({
+        bodyA: leftUpperArm,
+        bodyB: leftForearm,
+        length: 48,
+        stiffness: 0.75
+      }));
+
+      constraints.push(Matter.Constraint.create({
+        bodyA: leftForearm,
+        bodyB: leftHand,
+        length: 35,
+        stiffness: 0.7
+      }));
+
+      // Right arm chain
+      constraints.push(Matter.Constraint.create({
+        bodyA: upperTorso,
+        bodyB: rightUpperArm,
+        length: 50,
+        stiffness: 0.75
+      }));
+
+      constraints.push(Matter.Constraint.create({
+        bodyA: rightUpperArm,
+        bodyB: rightForearm,
+        length: 48,
+        stiffness: 0.75
+      }));
+
+      constraints.push(Matter.Constraint.create({
+        bodyA: rightForearm,
+        bodyB: rightHand,
+        length: 35,
+        stiffness: 0.7
+      }));
+
+      // Left leg chain
+      constraints.push(Matter.Constraint.create({
+        bodyA: lowerTorso,
+        bodyB: leftUpperLeg,
+        length: 55,
         stiffness: 0.8
       }));
 
       constraints.push(Matter.Constraint.create({
-        bodyA: torso,
-        bodyB: leftArm,
-        length: 45,
-        stiffness: 0.6
+        bodyA: leftUpperLeg,
+        bodyB: leftLowerLeg,
+        length: 52,
+        stiffness: 0.8
       }));
 
       constraints.push(Matter.Constraint.create({
-        bodyA: torso,
-        bodyB: rightArm,
-        length: 45,
-        stiffness: 0.6
+        bodyA: leftLowerLeg,
+        bodyB: leftFoot,
+        length: 35,
+        stiffness: 0.75
+      }));
+
+      // Right leg chain
+      constraints.push(Matter.Constraint.create({
+        bodyA: lowerTorso,
+        bodyB: rightUpperLeg,
+        length: 55,
+        stiffness: 0.8
       }));
 
       constraints.push(Matter.Constraint.create({
-        bodyA: torso,
-        bodyB: leftLeg,
-        length: 50,
-        stiffness: 0.7
+        bodyA: rightUpperLeg,
+        bodyB: rightLowerLeg,
+        length: 52,
+        stiffness: 0.8
       }));
 
       constraints.push(Matter.Constraint.create({
-        bodyA: torso,
-        bodyB: rightLeg,
-        length: 50,
-        stiffness: 0.7
+        bodyA: rightLowerLeg,
+        bodyB: rightFoot,
+        length: 35,
+        stiffness: 0.75
       }));
 
       bodies.forEach(body => World.add(world, body));
@@ -623,7 +773,7 @@
       for (let body of allBodies) {
         if (body.label === 'guy') {
           const d = Math.sqrt((body.position.x - pos.x) ** 2 + (body.position.y - pos.y) ** 2);
-          if (d < 80) {
+          if (d < 120) {
             draggedBody = body;
             break;
           }
@@ -636,6 +786,11 @@
         Body.setPosition(draggedBody, {
           x: e.clientX,
           y: e.clientY - 80
+        });
+        // Apply velocity for more interactive dragging
+        Body.setVelocity(draggedBody, {
+          x: (e.clientX - draggedBody.positionPrev.x) * 0.05,
+          y: (e.clientY - 80 - draggedBody.positionPrev.y) * 0.05
         });
       }
     });
@@ -652,7 +807,7 @@
       for (let body of allBodies) {
         if (body.label === 'guy') {
           const d = Math.sqrt((body.position.x - pos.x) ** 2 + (body.position.y - pos.y) ** 2);
-          if (d < 80) {
+          if (d < 120) {
             draggedBody = body;
             break;
           }
@@ -665,6 +820,10 @@
         Body.setPosition(draggedBody, {
           x: e.touches[0].clientX,
           y: e.touches[0].clientY - 80
+        });
+        Body.setVelocity(draggedBody, {
+          x: (e.touches[0].clientX - draggedBody.positionPrev.x) * 0.05,
+          y: (e.touches[0].clientY - 80 - draggedBody.positionPrev.y) * 0.05
         });
       }
     });
@@ -794,53 +953,82 @@
       ctx.fillRect(0, 0, 20, canvas.height);
       ctx.fillRect(canvas.width - 20, 0, 20, canvas.height);
 
-      // Draw guy
-      ragdoll.bodies.forEach((body, index) => {
-        ctx.save();
-        ctx.translate(body.position.x, body.position.y);
-        ctx.rotate(body.angle);
-
-        if (index === 0) {
-          // Head
-          ctx.fillStyle = '#ffdbac';
-          ctx.beginPath();
-          ctx.arc(0, 0, body.circleRadius, 0, Math.PI * 2);
-          ctx.fill();
-          // Eyes
-          ctx.fillStyle = '#333';
-          ctx.fillRect(-8, -5, 4, 4);
-          ctx.fillRect(4, -5, 4, 4);
-          // Smile
-          ctx.strokeStyle = '#333';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.arc(0, 3, 8, 0, Math.PI);
-          ctx.stroke();
-        } else if (index === 1) {
-          // Torso
-          ctx.fillStyle = '#ff6b6b';
-          ctx.fillRect(-body.vertices[0].x, -body.vertices[0].y, body.vertices[0].x * 2, body.vertices[1].y * 2);
-        } else if (index === 2 || index === 3) {
-          // Arms
-          ctx.fillStyle = '#ffdbac';
-          ctx.fillRect(-body.vertices[0].x, -body.vertices[0].y, body.vertices[0].x * 2, body.vertices[1].y * 2);
-        } else {
-          // Legs
-          ctx.fillStyle = '#4a4a4a';
-          ctx.fillRect(-body.vertices[0].x, -body.vertices[0].y, body.vertices[0].x * 2, body.vertices[1].y * 2);
-        }
-
-        ctx.restore();
-      });
-
-      // Draw constraints
-      ctx.strokeStyle = 'rgba(255, 107, 107, 0.4)';
-      ctx.lineWidth = 2;
+      // Draw constraints (joints)
+      ctx.strokeStyle = 'rgba(255, 107, 107, 0.5)';
+      ctx.lineWidth = 3;
       ragdoll.constraints.forEach(constraint => {
         ctx.beginPath();
         ctx.moveTo(constraint.bodyA.position.x, constraint.bodyA.position.y);
         ctx.lineTo(constraint.bodyB.position.x, constraint.bodyB.position.y);
         ctx.stroke();
+      });
+
+      // Draw guy - 15 body parts
+      const partColors = [
+        '#ffdbac', // 0: Head
+        '#ff6b6b', // 1: Upper Torso
+        '#ff5252', // 2: Lower Torso
+        '#ffdbac', // 3: Left Upper Arm
+        '#ffdbac', // 4: Left Forearm
+        '#ffdbac', // 5: Left Hand
+        '#ffdbac', // 6: Right Upper Arm
+        '#ffdbac', // 7: Right Forearm
+        '#ffdbac', // 8: Right Hand
+        '#4a4a4a', // 9: Left Upper Leg
+        '#3a3a3a', // 10: Left Lower Leg
+        '#2a2a2a', // 11: Left Foot
+        '#4a4a4a', // 12: Right Upper Leg
+        '#3a3a3a', // 13: Right Lower Leg
+        '#2a2a2a'  // 14: Right Foot
+      ];
+
+      ragdoll.bodies.forEach((body, index) => {
+        ctx.save();
+        ctx.translate(body.position.x, body.position.y);
+        ctx.rotate(body.angle);
+
+        ctx.fillStyle = partColors[index];
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+
+        if (index === 0) {
+          // Head (circle)
+          ctx.beginPath();
+          ctx.arc(0, 0, 30, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          
+          // Eyes
+          ctx.fillStyle = '#333';
+          ctx.fillRect(-12, -8, 6, 6);
+          ctx.fillRect(6, -8, 6, 6);
+          
+          // Smile
+          ctx.strokeStyle = '#333';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(0, 5, 12, 0, Math.PI);
+          ctx.stroke();
+        } else if (index === 5 || index === 8 || index === 11 || index === 14) {
+          // Hands and Feet (circles)
+          ctx.beginPath();
+          ctx.arc(0, 0, body.circleRadius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          // All other parts (rectangles)
+          const vertices = body.vertices;
+          ctx.beginPath();
+          ctx.moveTo(vertices[0].x - body.position.x, vertices[0].y - body.position.y);
+          for (let i = 1; i < vertices.length; i++) {
+            ctx.lineTo(vertices[i].x - body.position.x, vertices[i].y - body.position.y);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        ctx.restore();
       });
 
       // Draw items
@@ -851,14 +1039,25 @@
 
         if (item.circleRadius) {
           ctx.fillStyle = '#ffe66d';
+          ctx.strokeStyle = '#ff9800';
+          ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.arc(0, 0, item.circleRadius, 0, Math.PI * 2);
           ctx.fill();
+          ctx.stroke();
         } else {
           ctx.fillStyle = '#a78bfa';
-          const w = item.vertices[2].x - item.vertices[0].x;
-          const h = item.vertices[1].y - item.vertices[0].y;
-          ctx.fillRect(-w / 2, -h / 2, w, h);
+          ctx.strokeStyle = '#7c3aed';
+          ctx.lineWidth = 2;
+          const vertices = item.vertices;
+          ctx.beginPath();
+          ctx.moveTo(vertices[0].x - item.position.x, vertices[0].y - item.position.y);
+          for (let i = 1; i < vertices.length; i++) {
+            ctx.lineTo(vertices[i].x - item.position.x, vertices[i].y - item.position.y);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
         }
 
         ctx.restore();
@@ -871,11 +1070,11 @@
       });
 
       // Draw health bar
-      ctx.fillStyle = '#333';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
       ctx.fillRect(20, 100, 200, 20);
       ctx.fillStyle = guyHealth > 30 ? '#4ecdc4' : '#ff6b6b';
-      ctx.fillRect(20, 100, (guyHealth / 100) * 200, 20);
-      ctx.strokeStyle = '#333';
+      ctx.fillRect(22, 102, (guyHealth / 100) * 196, 16);
+      ctx.strokeStyle = '#000';
       ctx.lineWidth = 2;
       ctx.strokeRect(20, 100, 200, 20);
       ctx.fillStyle = '#333';
