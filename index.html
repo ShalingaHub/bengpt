@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jai's Fun Stuf • Unblocked Games</title>
+  <title>Jai's Fun Stuff • Unblocked Games</title>
   <style>
     * {
       margin: 0;
@@ -35,14 +35,40 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg-light);
+      background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 50%, #e8f4f8 100%);
+      background-attachment: fixed;
       color: var(--text-light);
       transition: background-color 0.3s, color 0.3s;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 230, 109, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
     }
 
     body.dark-mode {
-      background-color: var(--bg-dark);
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0d1b1f 100%);
+      background-attachment: fixed;
       color: var(--text-dark);
+    }
+
+    body.dark-mode::before {
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 230, 109, 0.1) 0%, transparent 50%);
     }
 
     header {
@@ -294,6 +320,73 @@
       letter-spacing: 0.5px;
     }
 
+    .easter-egg-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 50;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .sleeping-guy {
+      font-size: 4rem;
+      animation: sleep-breathe 2s ease-in-out infinite;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+      transition: transform 0.1s;
+    }
+
+    .easter-egg-container:hover .sleeping-guy {
+      transform: scale(1.1);
+    }
+
+    @keyframes sleep-breathe {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-3px); }
+    }
+
+    @keyframes page-shake {
+      0%, 100% { transform: translateX(0) translateY(0) rotate(0deg); }
+      10% { transform: translateX(-5px) translateY(-5px) rotate(-0.5deg); }
+      20% { transform: translateX(5px) translateY(5px) rotate(0.5deg); }
+      30% { transform: translateX(-5px) translateY(5px) rotate(-0.5deg); }
+      40% { transform: translateX(5px) translateY(-5px) rotate(0.5deg); }
+      50% { transform: translateX(-5px) translateY(-5px) rotate(-0.5deg); }
+      60% { transform: translateX(5px) translateY(5px) rotate(0.5deg); }
+      70% { transform: translateX(-5px) translateY(5px) rotate(-0.5deg); }
+      80% { transform: translateX(5px) translateY(-5px) rotate(0.5deg); }
+      90% { transform: translateX(-3px) translateY(-3px) rotate(-0.3deg); }
+    }
+
+    body.shake-page {
+      animation: page-shake 0.6s ease-in-out;
+    }
+
+    .scream-text {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 8rem;
+      font-weight: 900;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 999;
+      animation: scream-pop 0.6s ease-out;
+      text-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+    }
+
+    @keyframes scream-pop {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.5);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(2);
+      }
+    }
+
     @media (max-width: 768px) {
       .header-content h1 {
         font-size: 1.8rem;
@@ -342,7 +435,7 @@
 <body>
   <header>
     <div class="header-content">
-      <h1>🎮 Jai's Fun Stuf</h1>
+      <h1>🎮 Jai's Fun Stuff</h1>
       <p>the BETTER unblocked games</p>
     </div>
     <button class="theme-toggle" id="themeToggle">🌙</button>
@@ -355,7 +448,7 @@
         <div class="game-header">💬</div>
         <div class="game-body">
           <h2 class="game-title">Ben GPT</h2>
-          <p class="game-description">Chat with an retarded AI, steal money from it, and unlock things...</p>
+          <p class="game-description">Chat with an intelligent AI assistant. Ask questions, have conversations, and explore the power of natural language processing.</p>
           <div class="game-stats">
             <div class="visit-counter">
               👀 <span class="visit-count" id="bengptVisits">0</span>
@@ -367,8 +460,12 @@
     </div>
   </main>
 
+  <div class="easter-egg-container" id="easterEgg">
+    <div class="sleeping-guy">😴</div>
+  </div>
+
   <footer>
-    <p>Made with my two braincells | More fun games coming soon!</p>
+    <p>Made with ❤️ by Jai | More fun games coming soon!</p>
   </footer>
 
   <script>
@@ -418,6 +515,31 @@
       } else if (e.key === 'jaisFunTheme') {
         loadTheme();
       }
+    });
+
+    // Easter Egg - Sleeping Guy
+    const easterEgg = document.getElementById('easterEgg');
+    const sleepingGuy = easterEgg.querySelector('.sleeping-guy');
+
+    easterEgg.addEventListener('click', () => {
+      // Create scream text
+      const scream = document.createElement('div');
+      scream.className = 'scream-text';
+      scream.textContent = '😱';
+      document.body.appendChild(scream);
+
+      // Trigger page shake
+      document.body.classList.add('shake-page');
+
+      // Update sleeping guy to awake
+      sleepingGuy.textContent = '😱';
+
+      // Reset after animation
+      setTimeout(() => {
+        document.body.classList.remove('shake-page');
+        sleepingGuy.textContent = '😴';
+        scream.remove();
+      }, 600);
     });
   </script>
 </body>
