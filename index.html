@@ -27,6 +27,9 @@
       --accent-3: #ffe66d;
       --accent-4: #a78bfa;
       --accent-5: #f87171;
+      --glow-red: 255, 107, 107;
+      --glow-teal: 78, 205, 196;
+      --glow-yellow: 255, 230, 109;
     }
 
     html {
@@ -51,11 +54,27 @@
       width: 100%;
       height: 100%;
       background: 
-        radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.05) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.05) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(255, 230, 109, 0.05) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 230, 109, 0.1) 0%, transparent 50%);
       pointer-events: none;
       z-index: -1;
+      animation: gradient-shift 8s ease-in-out infinite;
+    }
+
+    @keyframes gradient-shift {
+      0%, 100% {
+        background: 
+          radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, rgba(255, 230, 109, 0.1) 0%, transparent 50%);
+      }
+      50% {
+        background: 
+          radial-gradient(circle at 30% 70%, rgba(255, 107, 107, 0.15) 0%, transparent 50%),
+          radial-gradient(circle at 70% 30%, rgba(78, 205, 196, 0.15) 0%, transparent 50%),
+          radial-gradient(circle at 50% 50%, rgba(255, 230, 109, 0.15) 0%, transparent 50%);
+      }
     }
 
     body.dark-mode {
@@ -66,9 +85,9 @@
 
     body.dark-mode::before {
       background: 
-        radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(255, 230, 109, 0.1) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 230, 109, 0.2) 0%, transparent 50%);
     }
 
     header {
@@ -78,10 +97,16 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 0 40px rgba(255, 107, 107, 0.3);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      animation: header-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes header-glow {
+      0%, 100% { box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 0 40px rgba(255, 107, 107, 0.3); }
+      50% { box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 0 60px rgba(78, 205, 196, 0.4); }
     }
 
     .dark-mode header {
@@ -98,8 +123,14 @@
       margin-bottom: 5px;
       font-weight: 800;
       color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2), 0 0 20px rgba(255,255,255,0.3);
       letter-spacing: -1px;
+      animation: title-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes title-pulse {
+      0%, 100% { text-shadow: 2px 2px 4px rgba(0,0,0,0.2), 0 0 20px rgba(255,255,255,0.3); }
+      50% { text-shadow: 2px 2px 4px rgba(0,0,0,0.2), 0 0 30px rgba(255,255,255,0.6); }
     }
 
     .header-content p {
@@ -148,7 +179,21 @@
       cursor: pointer;
       border: 3px solid transparent;
       position: relative;
+      animation: card-entrance 0.6s ease-out both;
     }
+
+    @keyframes card-entrance {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .game-card:nth-child(1) { animation-delay: 0.2s; }
 
     .dark-mode .game-card {
       background: var(--bg-dark-secondary);
@@ -169,7 +214,7 @@
     }
 
     .game-card.bengpt:hover {
-      box-shadow: 0 16px 40px var(--accent-1);
+      box-shadow: 0 16px 40px var(--accent-1), 0 0 30px rgba(255, 107, 107, 0.5);
       opacity: 0.95;
     }
 
@@ -206,6 +251,22 @@
     @keyframes shimmer {
       0%, 100% { opacity: 0.5; }
       50% { opacity: 1; }
+    }
+
+    .game-header::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+      animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
     }
 
     .game-body {
@@ -282,15 +343,35 @@
       text-decoration: none;
       display: inline-block;
       text-align: center;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
     }
 
     .play-btn:hover {
-      transform: scale(1.02);
-      box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(255, 107, 107, 0.5), 0 0 25px rgba(255, 107, 107, 0.4);
     }
 
     .play-btn:active {
       transform: scale(0.98);
+    }
+
+    .play-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+      border-radius: 10px;
+      animation: btn-shine 2s infinite;
+    }
+
+    @keyframes btn-shine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
     }
 
     footer {
@@ -387,6 +468,29 @@
       }
     }
 
+    .floating-particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    #particle-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes float-up {
+      to {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
     @media (max-width: 768px) {
       .header-content h1 {
         font-size: 1.8rem;
@@ -454,11 +558,13 @@
               👀 <span class="visit-count" id="bengptVisits">0</span>
             </div>
           </div>
-          <a href="chat.html" class="play-btn" onclick="incrementBengptVisits()">Play Now 🚀</a>
+          <a href="chat.html" class="play-btn" id="bengptPlayBtn">Play Now 🚀</a>
         </div>
       </div>
     </div>
   </main>
+
+  <div id="particle-container"></div>
 
   <div class="easter-egg-container" id="easterEgg">
     <div class="sleeping-guy">😴</div>
@@ -507,6 +613,68 @@
     // Initialize
     loadTheme();
     loadBengptVisits();
+
+    // Handle Ben GPT button click
+    const bengptPlayBtn = document.getElementById('bengptPlayBtn');
+    bengptPlayBtn.addEventListener('click', (e) => {
+      incrementBengptVisits();
+      // Navigation happens automatically since it's an <a> tag
+    });
+
+    // Create floating particles
+    function createParticles() {
+      const container = document.getElementById('particle-container');
+      const particles = ['✨', '🎮', '🎨', '🚀', '⭐', '💫', '🎯', '🎪'];
+      
+      function spawnParticle() {
+        const particle = document.createElement('div');
+        particle.className = 'floating-particle';
+        particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+        
+        const x = Math.random() * window.innerWidth;
+        const y = window.innerHeight + 50;
+        const duration = Math.random() * 5 + 5;
+        const size = Math.random() * 20 + 15;
+        
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        particle.style.fontSize = size + 'px';
+        particle.style.opacity = Math.random() * 0.5 + 0.3;
+        particle.style.animation = `float-up ${duration}s linear forwards`;
+        
+        container.appendChild(particle);
+        
+        setTimeout(() => particle.remove(), duration * 1000);
+      }
+      
+      // Spawn particles periodically
+      setInterval(spawnParticle, 1500);
+    }
+
+    // Start particle creation
+    createParticles();
+
+    // Add scroll animation trigger
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.game-card').forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'all 0.6s ease-out';
+      observer.observe(card);
+    });
 
     // Listen for storage changes from other tabs
     window.addEventListener('storage', (e) => {
