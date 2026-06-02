@@ -222,6 +222,19 @@
       box-shadow: 0 0 30px var(--accent-1);
     }
 
+    .game-card.physics {
+      border-color: var(--accent-2);
+    }
+
+    .game-card.physics:hover {
+      box-shadow: 0 16px 40px var(--accent-2), 0 0 30px rgba(78, 205, 196, 0.5);
+      opacity: 0.95;
+    }
+
+    .dark-mode .game-card.physics:hover {
+      box-shadow: 0 0 30px var(--accent-2);
+    }
+
     .game-header {
       height: 140px;
       background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-5) 100%);
@@ -561,6 +574,21 @@
           <a href="chat.html" class="play-btn" id="bengptPlayBtn">Play Now 🚀</a>
         </div>
       </div>
+
+      <!-- Physics Slam Card -->
+      <div class="game-card physics">
+        <div class="game-header">💥</div>
+        <div class="game-body">
+          <h2 class="game-title">Physics Slam</h2>
+          <p class="game-description">Drag a ragdoll guy around and slam him for profit! Buy weapons and projectiles to increase your earnings. Damage = Money!</p>
+          <div class="game-stats">
+            <div class="visit-counter">
+              👀 <span class="visit-count" id="physicsVisits">0</span>
+            </div>
+          </div>
+          <a href="physics.html" class="play-btn" id="physicsPlayBtn">Play Now 🚀</a>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -610,14 +638,34 @@
       document.getElementById('bengptVisits').textContent = visits.toLocaleString();
     }
 
+    function loadPhysicsVisits() {
+      const visits = parseInt(localStorage.getItem('physicsGlobalVisits') || '0');
+      document.getElementById('physicsVisits').textContent = visits.toLocaleString();
+    }
+
+    function incrementPhysicsVisits() {
+      let visits = parseInt(localStorage.getItem('physicsGlobalVisits') || '0');
+      visits++;
+      localStorage.setItem('physicsGlobalVisits', visits.toString());
+      document.getElementById('physicsVisits').textContent = visits.toLocaleString();
+    }
+
     // Initialize
     loadTheme();
     loadBengptVisits();
+    loadPhysicsVisits();
 
     // Handle Ben GPT button click
     const bengptPlayBtn = document.getElementById('bengptPlayBtn');
     bengptPlayBtn.addEventListener('click', (e) => {
       incrementBengptVisits();
+      // Navigation happens automatically since it's an <a> tag
+    });
+
+    // Handle Physics Slam button click
+    const physicsPlayBtn = document.getElementById('physicsPlayBtn');
+    physicsPlayBtn.addEventListener('click', (e) => {
+      incrementPhysicsVisits();
       // Navigation happens automatically since it's an <a> tag
     });
 
@@ -680,6 +728,8 @@
     window.addEventListener('storage', (e) => {
       if (e.key === 'bengptGlobalVisits') {
         loadBengptVisits();
+      } else if (e.key === 'physicsGlobalVisits') {
+        loadPhysicsVisits();
       } else if (e.key === 'jaisFunTheme') {
         loadTheme();
       }
