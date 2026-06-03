@@ -589,6 +589,21 @@
           <a href="physics.html" class="play-btn" id="physicsPlayBtn">Play Now 🚀</a>
         </div>
       </div>
+
+      <!-- Character Chat Card -->
+      <div class="game-card bengpt">
+        <div class="game-header">🎭</div>
+        <div class="game-body">
+          <h2 class="game-title">Character Chat</h2>
+          <p class="game-description">Create unique characters with custom personalities. Chat with them using AI to generate realistic, in-character responses. Build your cast of characters!</p>
+          <div class="game-stats">
+            <div class="visit-counter">
+              👀 <span class="visit-count" id="charactersVisits">0</span>
+            </div>
+          </div>
+          <a href="characters.html" class="play-btn" id="charactersPlayBtn">Play Now 🚀</a>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -650,10 +665,23 @@
       document.getElementById('physicsVisits').textContent = visits.toLocaleString();
     }
 
+    function loadCharactersVisits() {
+      const visits = parseInt(localStorage.getItem('charactersGlobalVisits') || '0');
+      document.getElementById('charactersVisits').textContent = visits.toLocaleString();
+    }
+
+    function incrementCharactersVisits() {
+      let visits = parseInt(localStorage.getItem('charactersGlobalVisits') || '0');
+      visits++;
+      localStorage.setItem('charactersGlobalVisits', visits.toString());
+      document.getElementById('charactersVisits').textContent = visits.toLocaleString();
+    }
+
     // Initialize
     loadTheme();
     loadBengptVisits();
     loadPhysicsVisits();
+    loadCharactersVisits();
 
     // Handle Ben GPT button click
     const bengptPlayBtn = document.getElementById('bengptPlayBtn');
@@ -666,6 +694,13 @@
     const physicsPlayBtn = document.getElementById('physicsPlayBtn');
     physicsPlayBtn.addEventListener('click', (e) => {
       incrementPhysicsVisits();
+      // Navigation happens automatically since it's an <a> tag
+    });
+
+    // Handle Characters Chat button click
+    const charactersPlayBtn = document.getElementById('charactersPlayBtn');
+    charactersPlayBtn.addEventListener('click', (e) => {
+      incrementCharactersVisits();
       // Navigation happens automatically since it's an <a> tag
     });
 
@@ -730,6 +765,8 @@
         loadBengptVisits();
       } else if (e.key === 'physicsGlobalVisits') {
         loadPhysicsVisits();
+      } else if (e.key === 'charactersGlobalVisits') {
+        loadCharactersVisits();
       } else if (e.key === 'jaisFunTheme') {
         loadTheme();
       }
