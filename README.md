@@ -11,6 +11,9 @@ AI AI AI AI AI is the future
 Link:
 https://shalingahub.github.io/bengpt/
 
+WIP BENGPT:
+https://bengpt.vercel.app/
+
 sorry the website is kinda buggy :(
 so to compensate
 <img width="325" height="225" alt="image" src="https://github.com/user-attachments/assets/d4c3590b-594c-4264-9735-8eb96065cecd" /> 
