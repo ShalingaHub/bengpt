@@ -666,46 +666,63 @@
 
     async function getCharacterResponse(char, otherChars, topic, previousMessages) {
       const otherNames = otherChars.map(c => c.name).join(' and ');
-      
+
       const systemPrompt = `You are ${char.name}. ${char.description}
 
 You are having a conversation with ${otherNames} about: "${topic}"
 
-IMPORTANT: 
+IMPORTANT:
 - Keep your response to 1-3 sentences max
 - Stay in character and respond naturally
 - Don't repeat what was just said
 - React to what others say, don't just add random thoughts`;
 
-      const messages = previousMessages
-        .map(msg => ({
-          role: msg.speaker === char.name ? 'user' : 'model',
-          parts: [{ text: `${msg.speaker}: ${msg.text}` }]
-        }));
+      const promptMessages = [
+        {
+          author: 'system',
+          content: [{ type: 'text', text: systemPrompt }]
+        },
+        ...previousMessages.map(msg => ({
+          author: 'user',
+          content: [{ type: 'text', text: `${msg.speaker}: ${msg.text}` }]
+        })),
+        {
+          author: 'user',
+          content: [{ type: 'text', text: `As ${char.name}, reply with the next line in the conversation.` }]
+        }
+      ];
 
       try {
         const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            contents: messages,
-            generationConfig: {
-              temperature: 0.9,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 150,
-            }
+            prompt: { messages: promptMessages },
+            temperature: 0.9,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 150,
           })
         });
 
-        if (!response.ok) throw new Error(`API error: ${response.status}`);
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`API error: ${response.status} ${errorText}`);
+        }
 
         const data = await response.json();
-        if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-          return data.candidates[0].content.parts[0].text;
+        const candidateText = data?.candidates?.[0]?.content?.[0]?.text
+          || data?.candidates?.[0]?.content?.parts?.[0]?.text
+          || data?.candidates?.[0]?.output
+          || data?.candidates?.[0]?.output?.[0]?.content?.[0]?.text
+          || data?.output?.[0]?.content?.[0]?.text
+          || data?.content?.[0]?.text;
+
+        if (candidateText) {
+          return candidateText.trim();
         }
-        throw new Error('No response');
+
+        throw new Error(`No response: ${JSON.stringify(data)}`);
       } catch (error) {
         console.error('API error:', error);
         return null;
