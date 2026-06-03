@@ -4,879 +4,381 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Physics Slam • Damage = Profit</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/2.0.20/matter.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    :root {
-      --bg-light: #fafafa;
-      --bg-light-secondary: #f0f0f0;
-      --text-light: #1a1a1a;
-      --text-light-secondary: #666;
-      
-      --bg-dark: #0a0a0a;
-      --bg-dark-secondary: #1a1a1a;
-      --text-dark: #f5f5f5;
-      --text-dark-secondary: #aaa;
-
-      --accent-1: #ff6b6b;
-      --accent-2: #4ecdc4;
-      --accent-3: #ffe66d;
-      --accent-4: #a78bfa;
-      --accent-5: #f87171;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 50%, #e8f4f8 100%);
-      background-attachment: fixed;
-      color: var(--text-light);
-      transition: background-color 0.3s, color 0.3s;
-      overflow: hidden;
-    }
-
-    body.dark-mode {
-      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0d1b1f 100%);
-      color: var(--text-dark);
-    }
-
-    header {
-      padding: 15px 20px;
-      text-align: center;
-      background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #ffe66d 100%);
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      animation: header-glow 3s ease-in-out infinite;
-    }
-
-    @keyframes header-glow {
-      0%, 100% { box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 0 40px rgba(255, 107, 107, 0.3); }
-      50% { box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 0 60px rgba(78, 205, 196, 0.4); }
-    }
-
-    .header-content {
-      flex: 1;
-    }
-
-    .header-content h1 {
-      font-size: 1.8rem;
-      margin-bottom: 2px;
-      font-weight: 800;
-      color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-      letter-spacing: -1px;
-    }
-
-    .header-content p {
-      font-size: 0.8rem;
-      color: rgba(255,255,255,0.95);
-      font-weight: 600;
-    }
-
-    .header-controls {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-
-    .money-display {
-      background: rgba(255,255,255,0.3);
-      padding: 10px 16px;
-      border-radius: 25px;
-      color: white;
-      font-weight: bold;
-      font-size: 1.1rem;
-      border: 2px solid rgba(255,255,255,0.6);
-    }
-
-    .theme-toggle, .back-btn {
-      background: rgba(255,255,255,0.3);
-      border: 2px solid rgba(255,255,255,0.6);
-      padding: 8px 14px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: all 0.3s;
-      color: white;
-      font-weight: bold;
-      text-decoration: none;
-      display: inline-block;
-    }
-
-    .theme-toggle:hover, .back-btn:hover {
-      background: rgba(255,255,255,0.5);
-      transform: scale(1.05);
-    }
-
-    canvas {
-      display: block;
-      margin-top: 80px;
-      background: linear-gradient(135deg, #f5f5f5 0%, #e0f7ff 100%);
-      position: relative;
-      z-index: 50;
-    }
-
-    body.dark-mode canvas {
-      background: linear-gradient(135deg, #1a1a1a 0%, #0d1b1f 100%);
-    }
-
-    .sidebar {
-      position: fixed;
-      right: 20px;
-      top: 100px;
-      background: rgba(255,255,255,0.95);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-      z-index: 10;
-      max-width: 280px;
-      max-height: calc(100vh - 140px);
-      overflow-y: auto;
-    }
-
-    body.dark-mode .sidebar {
-      background: rgba(26,26,26,0.95);
-      color: var(--text-dark);
-    }
-
-    .sidebar h3 {
-      margin-bottom: 15px;
-      font-size: 1.2rem;
-      color: var(--accent-1);
-      border-bottom: 2px solid var(--accent-1);
-      padding-bottom: 10px;
-    }
-
-    .shop-item {
-      background: var(--bg-light-secondary);
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 12px;
-      cursor: pointer;
-      transition: all 0.3s;
-      border: 2px solid transparent;
-    }
-
-    body.dark-mode .shop-item {
-      background: var(--bg-dark-secondary);
-    }
-
-    .shop-item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-      border-color: var(--accent-2);
-    }
-
-    .shop-item-name {
-      font-weight: 700;
-      font-size: 0.95rem;
-      margin-bottom: 4px;
-      color: var(--text-light);
-    }
-
-    body.dark-mode .shop-item-name {
-      color: var(--text-dark);
-    }
-
-    .shop-item-price {
-      font-size: 0.85rem;
-      color: var(--accent-1);
-      font-weight: 600;
-    }
-
-    .shop-item-desc {
-      font-size: 0.75rem;
-      color: var(--text-light-secondary);
-      margin-top: 4px;
-    }
-
-    body.dark-mode .shop-item-desc {
-      color: var(--text-dark-secondary);
-    }
-
-    .damage-popup {
-      position: fixed;
-      font-size: 2rem;
-      font-weight: bold;
-      color: var(--accent-1);
-      pointer-events: none;
-      z-index: 95;
-      text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
-      animation: damage-float 1s ease-out forwards;
-    }
-
-    @keyframes damage-float {
-      0% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-      100% {
-        opacity: 0;
-        transform: translateY(-60px) scale(1.5);
-      }
-    }
-
-    .money-popup {
-      position: fixed;
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #4ecdc4;
-      pointer-events: none;
-      z-index: 95;
-      animation: money-float 1s ease-out forwards;
-    }
-
-    @keyframes money-float {
-      0% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-      100% {
-        opacity: 0;
-        transform: translateY(-60px) scale(1.5);
-      }
-    }
-
-    .instructions {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background: rgba(255,255,255,0.85);
-      border-radius: 12px;
-      padding: 16px;
-      font-size: 0.85rem;
-      max-width: 300px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    body.dark-mode .instructions {
-      background: rgba(26,26,26,0.95);
-      color: var(--text-dark);
-    }
-
-    .instructions strong {
-      color: var(--accent-1);
-    }
-
-    .stats {
-      position: fixed;
-      top: 100px;
-      left: 20px;
-      background: rgba(255,255,255,0.85);
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-      z-index: 10;
-      pointer-events: none;
-      font-size: 0.9rem;
-    }
-
-    body.dark-mode .stats {
-      background: rgba(26,26,26,0.95);
-      color: var(--text-dark);
-    }
-
-    .stat-row {
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .stat-label {
-      color: var(--text-light-secondary);
-      font-weight: 600;
-    }
-
-    body.dark-mode .stat-label {
-      color: var(--text-dark-secondary);
-    }
-
-    .stat-value {
-      color: var(--accent-2);
-      font-weight: 700;
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        right: 10px;
-        left: 10px;
-        max-width: none;
-        max-height: 200px;
-      }
-
-      .header-content h1 {
-        font-size: 1.3rem;
-      }
-
-      .instructions {
-        font-size: 0.75rem;
-        padding: 12px;
-      }
-
-      .stats {
-        font-size: 0.8rem;
-        padding: 12px;
-      }
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f0f0f0; overflow: hidden; }
+    header { padding: 15px 20px; background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #ffe66d 100%); position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+    h1 { color: white; font-size: 1.8rem; margin: 0; }
+    .controls { display: flex; gap: 15px; align-items: center; }
+    .money-display { background: rgba(255,255,255,0.3); padding: 10px 16px; border-radius: 25px; color: white; font-weight: bold; }
+    .back-btn { background: rgba(255,255,255,0.3); border: none; padding: 8px 14px; border-radius: 25px; color: white; cursor: pointer; font-weight: bold; text-decoration: none; }
+    canvas { display: block; margin-top: 60px; background: linear-gradient(135deg, #e0f7ff 0%, #f5f5f5 100%); position: relative; z-index: 50; }
+    .sidebar { position: fixed; right: 20px; top: 80px; background: rgba(255,255,255,0.95); border-radius: 12px; padding: 20px; z-index: 10; max-width: 250px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+    .sidebar h3 { color: #ff6b6b; margin-bottom: 15px; }
+    .shop-item { background: #f0f0f0; padding: 10px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; border: 2px solid transparent; }
+    .shop-item:hover { border-color: #4ecdc4; transform: translateY(-2px); }
+    .item-name { font-weight: bold; font-size: 0.9rem; margin-bottom: 4px; }
+    .item-price { color: #ff6b6b; font-weight: bold; font-size: 0.85rem; }
+    .stats { position: fixed; left: 20px; top: 80px; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 8px; z-index: 10; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .stat-row { margin-bottom: 8px; font-weight: bold; color: #333; }
   </style>
 </head>
 <body>
   <header>
-    <div class="header-content">
-      <h1>💥 Physics Slam</h1>
-      <p>Damage = Profit</p>
-    </div>
-    <div class="header-controls">
+    <h1>💥 Physics Slam</h1>
+    <div class="controls">
       <div class="money-display" id="moneyDisplay">💰 $0</div>
-      <button class="theme-toggle" id="themeToggle">🌙</button>
       <a href="index.html" class="back-btn">← Back</a>
     </div>
   </header>
 
-  <canvas id="physicsCanvas"></canvas>
+  <canvas id="gameCanvas"></canvas>
 
   <div class="stats">
-    <div class="stat-row">
-      <span class="stat-label">Money:</span>
-      <span class="stat-value" id="statMoney">$0</span>
-    </div>
-    <div class="stat-row">
-      <span class="stat-label">Guy HP:</span>
-      <span class="stat-value" id="statHP">100</span>
-    </div>
-    <div class="stat-row">
-      <span class="stat-label">Items:</span>
-      <span class="stat-value" id="statItems">0</span>
-    </div>
+    <div class="stat-row">💰 Money: <span id="statMoney">$0</span></div>
+    <div class="stat-row">❤️ Health: <span id="statHealth">100</span></div>
+    <div class="stat-row">🎯 Items: <span id="statItems">0</span></div>
   </div>
 
   <div class="sidebar">
     <h3>🛒 Shop</h3>
-    
     <div class="shop-item" onclick="buyItem('ball')">
-      <div class="shop-item-name">⚫ Ball</div>
-      <div class="shop-item-price">$5</div>
-      <div class="shop-item-desc">Bouncy projectile</div>
+      <div class="item-name">⚫ Ball</div>
+      <div class="item-price">$5</div>
     </div>
-
     <div class="shop-item" onclick="buyItem('box')">
-      <div class="shop-item-name">📦 Box</div>
-      <div class="shop-item-price">$10</div>
-      <div class="shop-item-desc">Heavy brick</div>
+      <div class="item-name">📦 Box</div>
+      <div class="item-price">$10</div>
     </div>
-
-    <div class="shop-item" onclick="buyItem('explosive')">
-      <div class="shop-item-name">💣 Explosive</div>
-      <div class="shop-item-price">$25</div>
-      <div class="shop-item-desc">Big boom! (+3x damage)</div>
-    </div>
-
     <div class="shop-item" onclick="buyItem('spike')">
-      <div class="shop-item-name">🌹 Spike Ball</div>
-      <div class="shop-item-price">$15</div>
-      <div class="shop-item-desc">Painful impact</div>
+      <div class="item-name">🌹 Spike</div>
+      <div class="item-price">$15</div>
     </div>
-
-    <div class="shop-item" onclick="buyItem('hammer')">
-      <div class="shop-item-name">🔨 Hammer</div>
-      <div class="shop-item-price">$20</div>
-      <div class="shop-item-desc">Crushing weapon</div>
+    <div class="shop-item" onclick="buyItem('explosive')">
+      <div class="item-name">💣 Boom!</div>
+      <div class="item-price">$25</div>
     </div>
-
-    <div class="shop-item" onclick="resetGame()">
-      <div class="shop-item-name">🔄 Reset Guy</div>
-      <div class="shop-item-price">Free</div>
-      <div class="shop-item-desc">Restore to life</div>
-    </div>
-  </div>
-
-  <div class="instructions">
-    <strong>How to Play:</strong><br>
-    🖱️ Drag the guy around<br>
-    💥 Slam him into things<br>
-    💰 Get paid per damage<br>
-    🛒 Buy weapons to increase $$<br>
-    ⚠️ Keep him from dying!
   </div>
 
   <script>
-    // Theme Toggle
-    const themeToggle = document.getElementById('themeToggle');
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
     
-    function loadTheme() {
-      const savedTheme = localStorage.getItem('physicsTheme') || 'light';
-      if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        themeToggle.textContent = '☀️';
-      } else {
-        document.body.classList.remove('dark-mode');
-        themeToggle.textContent = '🌙';
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight - 60;
+
+    const startingMoney = 50;
+    let money = Number(localStorage.getItem('physicsGameMoney'));
+    if (Number.isNaN(money)) money = startingMoney;
+    let health = 100;
+    let itemsSpawned = 0;
+
+    // Ragdoll body parts
+    class RagdollPart {
+      constructor(x, y, radius, options = {}) {
+        this.x = x;
+        this.y = y;
+        this.prevX = x;
+        this.prevY = y;
+        this.vx = 0;
+        this.vy = 0;
+        this.radius = radius;
+        this.mass = options.mass || 1;
+        this.color = options.color || '#ff6b6b';
+        this.pinned = options.pinned || false;
+      }
+
+      update(gravity, friction) {
+        if (this.pinned) return;
+
+        this.vx = (this.x - this.prevX) * friction;
+        this.vy = (this.y - this.prevY) * friction;
+        
+        this.prevX = this.x;
+        this.prevY = this.y;
+
+        this.vy += gravity;
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Boundary collisions
+        if (this.x - this.radius < 20) {
+          this.x = 20 + this.radius;
+          this.vx *= -0.6;
+        }
+        if (this.x + this.radius > canvas.width - 20) {
+          this.x = canvas.width - 20 - this.radius;
+          this.vx *= -0.6;
+        }
+        if (this.y + this.radius > canvas.height - 20) {
+          this.y = canvas.height - 20 - this.radius;
+          this.vy *= -0.5;
+        }
+      }
+
+      draw() {
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.stroke();
       }
     }
 
-    themeToggle.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      const isDark = document.body.classList.contains('dark-mode');
-      localStorage.setItem('physicsTheme', isDark ? 'dark' : 'light');
-      themeToggle.textContent = isDark ? '☀️' : '🌙';
-    });
+    class Joint {
+      constructor(partA, partB, length, stiffness = 0.95) {
+        this.partA = partA;
+        this.partB = partB;
+        this.length = length;
+        this.stiffness = stiffness;
+      }
 
-    loadTheme();
+      constrain() {
+        const dx = this.partB.x - this.partA.x;
+        const dy = this.partB.y - this.partA.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const diff = (this.length - dist) / dist;
+        const offsetX = dx * diff * 0.5 * this.stiffness;
+        const offsetY = dy * diff * 0.5 * this.stiffness;
 
-    // Matter.js setup
-    const Engine = Matter.Engine;
-    const World = Matter.World;
-    const Body = Matter.Body;
-    const Bodies = Matter.Bodies;
-    const Events = Matter.Events;
-    const Composite = Matter.Composite;
+        this.partA.x -= offsetX;
+        this.partA.y -= offsetY;
+        this.partB.x += offsetX;
+        this.partB.y += offsetY;
+      }
 
-    const canvas = document.getElementById('physicsCanvas');
-    const ctx = canvas.getContext('2d');
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight - 80;
-
-    const engine = Engine.create();
-    const world = engine.world;
-    world.gravity.y = 1;
-
-    let money = parseInt(localStorage.getItem('physicsGameMoney')) || 0;
-    let damageMultiplier = 1;
-    let guyHealth = 100;
-    let itemsSpawned = 0;
-    let items = [];
-    let dragConstraint = null;
-    let draggedBody = null;
-
-    // Create ground
-    const ground = Bodies.rectangle(canvas.width / 2, canvas.height - 20, canvas.width, 40, {
-      isStatic: true,
-      label: 'ground'
-    });
-    World.add(world, ground);
-
-    // Create walls
-    const leftWall = Bodies.rectangle(20, canvas.height / 2, 40, canvas.height, {
-      isStatic: true,
-      label: 'wall'
-    });
-    const rightWall = Bodies.rectangle(canvas.width - 20, canvas.height / 2, 40, canvas.height, {
-      isStatic: true,
-      label: 'wall'
-    });
-    const topWall = Bodies.rectangle(canvas.width / 2, 20, canvas.width, 40, {
-      isStatic: true,
-      label: 'wall'
-    });
-    World.add(world, [leftWall, rightWall, topWall]);
-
-    // Create the guy (ragdoll character with 15 parts)
-    function createRagdoll(x, y) {
-      const bodies = [];
-      const constraints = [];
-
-      // Head
-      const head = Bodies.circle(x, y - 140, 50, { 
-        density: 0.005,
-        label: 'guy',
-        restitution: 0.4,
-        friction: 0.6,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(head);
-
-      // Upper Torso
-      const upperTorso = Bodies.rectangle(x, y - 70, 70, 100, {
-        density: 0.006,
-        label: 'guy',
-        restitution: 0.2,
-        friction: 0.6,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(upperTorso);
-
-      // Lower Torso
-      const lowerTorso = Bodies.rectangle(x, y, 65, 80, {
-        density: 0.005,
-        label: 'guy',
-        restitution: 0.2,
-        friction: 0.6,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(lowerTorso);
-
-      // Left Upper Arm
-      const leftUpperArm = Bodies.rectangle(x - 60, y - 65, 28, 80, {
-        density: 0.003,
-        label: 'guy',
-        restitution: 0.3,
-        friction: 0.5,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(leftUpperArm);
-
-      // Left Forearm
-      const leftForearm = Bodies.rectangle(x - 90, y - 35, 24, 70, {
-        density: 0.002,
-        label: 'guy',
-        restitution: 0.3,
-        friction: 0.5,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(leftForearm);
-
-      // Left Hand
-      const leftHand = Bodies.circle(x - 105, y - 10, 18, {
-        density: 0.001,
-        label: 'guy',
-        restitution: 0.4,
-        friction: 0.4,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(leftHand);
-
-      // Right Upper Arm
-      const rightUpperArm = Bodies.rectangle(x + 60, y - 65, 28, 80, {
-        density: 0.003,
-        label: 'guy',
-        restitution: 0.3,
-        friction: 0.5,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(rightUpperArm);
-
-      // Right Forearm
-      const rightForearm = Bodies.rectangle(x + 90, y - 35, 24, 70, {
-        density: 0.002,
-        label: 'guy',
-        restitution: 0.3,
-        friction: 0.5,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(rightForearm);
-
-      // Right Hand
-      const rightHand = Bodies.circle(x + 105, y - 10, 18, {
-        density: 0.001,
-        label: 'guy',
-        restitution: 0.4,
-        friction: 0.4,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(rightHand);
-
-      // Left Upper Leg
-      const leftUpperLeg = Bodies.rectangle(x - 30, y + 50, 30, 85, {
-        density: 0.004,
-        label: 'guy',
-        restitution: 0.2,
-        friction: 0.6,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(leftUpperLeg);
-
-      // Left Lower Leg
-      const leftLowerLeg = Bodies.rectangle(x - 30, y + 110, 28, 80, {
-        density: 0.003,
-        label: 'guy',
-        restitution: 0.2,
-        friction: 0.6,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(leftLowerLeg);
-
-      // Left Foot
-      const leftFoot = Bodies.rectangle(x - 30, y + 170, 35, 25, {
-        density: 0.002,
-        label: 'guy',
-        restitution: 0.1,
-        friction: 0.8,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(leftFoot);
-
-      // Right Upper Leg
-      const rightUpperLeg = Bodies.rectangle(x + 30, y + 50, 30, 85, {
-        density: 0.004,
-        label: 'guy',
-        restitution: 0.2,
-        friction: 0.6,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(rightUpperLeg);
-
-      // Right Lower Leg
-      const rightLowerLeg = Bodies.rectangle(x + 30, y + 110, 28, 80, {
-        density: 0.003,
-        label: 'guy',
-        restitution: 0.2,
-        friction: 0.6,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(rightLowerLeg);
-
-      // Right Foot
-      const rightFoot = Bodies.rectangle(x + 30, y + 170, 35, 25, {
-        density: 0.002,
-        label: 'guy',
-        restitution: 0.1,
-        friction: 0.8,
-        collisionFilter: { category: 0x0001, mask: 0xFFFF }
-      });
-      bodies.push(rightFoot);
-
-      // Create constraints (joints between parts)
-      // Head to upper torso
-      constraints.push(Matter.Constraint.create({
-        bodyA: head,
-        bodyB: upperTorso,
-        length: 50,
-        stiffness: 0.9
-      }));
-
-      // Upper torso to lower torso
-      constraints.push(Matter.Constraint.create({
-        bodyA: upperTorso,
-        bodyB: lowerTorso,
-        length: 55,
-        stiffness: 0.85
-      }));
-
-      // Left arm chain
-      constraints.push(Matter.Constraint.create({
-        bodyA: upperTorso,
-        bodyB: leftUpperArm,
-        length: 50,
-        stiffness: 0.75
-      }));
-
-      constraints.push(Matter.Constraint.create({
-        bodyA: leftUpperArm,
-        bodyB: leftForearm,
-        length: 48,
-        stiffness: 0.75
-      }));
-
-      constraints.push(Matter.Constraint.create({
-        bodyA: leftForearm,
-        bodyB: leftHand,
-        length: 35,
-        stiffness: 0.7
-      }));
-
-      // Right arm chain
-      constraints.push(Matter.Constraint.create({
-        bodyA: upperTorso,
-        bodyB: rightUpperArm,
-        length: 50,
-        stiffness: 0.75
-      }));
-
-      constraints.push(Matter.Constraint.create({
-        bodyA: rightUpperArm,
-        bodyB: rightForearm,
-        length: 48,
-        stiffness: 0.75
-      }));
-
-      constraints.push(Matter.Constraint.create({
-        bodyA: rightForearm,
-        bodyB: rightHand,
-        length: 35,
-        stiffness: 0.7
-      }));
-
-      // Left leg chain
-      constraints.push(Matter.Constraint.create({
-        bodyA: lowerTorso,
-        bodyB: leftUpperLeg,
-        length: 55,
-        stiffness: 0.8
-      }));
-
-      constraints.push(Matter.Constraint.create({
-        bodyA: leftUpperLeg,
-        bodyB: leftLowerLeg,
-        length: 52,
-        stiffness: 0.8
-      }));
-
-      constraints.push(Matter.Constraint.create({
-        bodyA: leftLowerLeg,
-        bodyB: leftFoot,
-        length: 35,
-        stiffness: 0.75
-      }));
-
-      // Right leg chain
-      constraints.push(Matter.Constraint.create({
-        bodyA: lowerTorso,
-        bodyB: rightUpperLeg,
-        length: 55,
-        stiffness: 0.8
-      }));
-
-      constraints.push(Matter.Constraint.create({
-        bodyA: rightUpperLeg,
-        bodyB: rightLowerLeg,
-        length: 52,
-        stiffness: 0.8
-      }));
-
-      constraints.push(Matter.Constraint.create({
-        bodyA: rightLowerLeg,
-        bodyB: rightFoot,
-        length: 35,
-        stiffness: 0.75
-      }));
-
-      bodies.forEach(body => World.add(world, body));
-      constraints.forEach(constraint => World.add(world, constraint));
-
-      return { bodies, constraints };
+      draw() {
+        ctx.strokeStyle = 'rgba(100, 100, 100, 0.5)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(this.partA.x, this.partA.y);
+        ctx.lineTo(this.partB.x, this.partB.y);
+        ctx.stroke();
+      }
     }
 
-    // Store body dimensions for rendering
-    const bodyDimensions = {
-      0: { type: 'circle', radius: 50 },     // Head - BIGGER
-      1: { type: 'rect', w: 70, h: 100 },    // Upper Torso - BIGGER
-      2: { type: 'rect', w: 65, h: 80 },     // Lower Torso - BIGGER
-      3: { type: 'rect', w: 28, h: 80 },     // Left Upper Arm - BIGGER
-      4: { type: 'rect', w: 24, h: 70 },     // Left Forearm - BIGGER
-      5: { type: 'circle', radius: 18 },     // Left Hand - BIGGER
-      6: { type: 'rect', w: 28, h: 80 },     // Right Upper Arm - BIGGER
-      7: { type: 'rect', w: 24, h: 70 },     // Right Forearm - BIGGER
-      8: { type: 'circle', radius: 18 },     // Right Hand - BIGGER
-      9: { type: 'rect', w: 30, h: 85 },     // Left Upper Leg - BIGGER
-      10: { type: 'rect', w: 28, h: 80 },    // Left Lower Leg - BIGGER
-      11: { type: 'rect', w: 35, h: 25 },    // Left Foot - BIGGER
-      12: { type: 'rect', w: 30, h: 85 },    // Right Upper Leg - BIGGER
-      13: { type: 'rect', w: 28, h: 80 },    // Right Lower Leg - BIGGER
-      14: { type: 'rect', w: 35, h: 25 }     // Right Foot - BIGGER
+    // Create ragdoll
+    const ragdoll = {
+      parts: [],
+      joints: [],
+      isDragged: false,
+      draggedPart: null,
+
+      create(x, y) {
+        // Head
+        const head = new RagdollPart(x, y - 120, 20, { color: '#ffdbac', mass: 1 });
+        
+        // Torso
+        const upperTorso = new RagdollPart(x, y - 50, 18, { color: '#ff6b6b', mass: 2 });
+        const lowerTorso = new RagdollPart(x, y + 20, 16, { color: '#ff5252', mass: 1.5 });
+
+        // Left arm
+        const leftShoulder = new RagdollPart(x - 35, y - 60, 12, { color: '#ffdbac' });
+        const leftForearm = new RagdollPart(x - 70, y - 50, 10, { color: '#ffdbac' });
+        const leftHand = new RagdollPart(x - 95, y - 45, 8, { color: '#ffdbac' });
+
+        // Right arm
+        const rightShoulder = new RagdollPart(x + 35, y - 60, 12, { color: '#ffdbac' });
+        const rightForearm = new RagdollPart(x + 70, y - 50, 10, { color: '#ffdbac' });
+        const rightHand = new RagdollPart(x + 95, y - 45, 8, { color: '#ffdbac' });
+
+        // Left leg
+        const leftHip = new RagdollPart(x - 12, y + 50, 14, { color: '#4a4a4a' });
+        const leftCalf = new RagdollPart(x - 12, y + 95, 12, { color: '#3a3a3a' });
+        const leftFoot = new RagdollPart(x - 12, y + 135, 10, { color: '#2a2a2a' });
+
+        // Right leg
+        const rightHip = new RagdollPart(x + 12, y + 50, 14, { color: '#4a4a4a' });
+        const rightCalf = new RagdollPart(x + 12, y + 95, 12, { color: '#3a3a3a' });
+        const rightFoot = new RagdollPart(x + 12, y + 135, 10, { color: '#2a2a2a' });
+
+        this.parts = [head, upperTorso, lowerTorso, leftShoulder, leftForearm, leftHand, 
+                      rightShoulder, rightForearm, rightHand, leftHip, leftCalf, leftFoot, 
+                      rightHip, rightCalf, rightFoot];
+
+        // Joints
+        this.joints = [
+          new Joint(head, upperTorso, 25, 0.95),
+          new Joint(upperTorso, lowerTorso, 40, 0.9),
+
+          new Joint(upperTorso, leftShoulder, 28, 0.85),
+          new Joint(leftShoulder, leftForearm, 35, 0.85),
+          new Joint(leftForearm, leftHand, 28, 0.8),
+
+          new Joint(upperTorso, rightShoulder, 28, 0.85),
+          new Joint(rightShoulder, rightForearm, 35, 0.85),
+          new Joint(rightForearm, rightHand, 28, 0.8),
+
+          new Joint(lowerTorso, leftHip, 22, 0.9),
+          new Joint(leftHip, leftCalf, 45, 0.9),
+          new Joint(leftCalf, leftFoot, 40, 0.85),
+
+          new Joint(lowerTorso, rightHip, 22, 0.9),
+          new Joint(rightHip, rightCalf, 45, 0.9),
+          new Joint(rightCalf, rightFoot, 40, 0.85)
+        ];
+      },
+
+      update(gravity, friction) {
+        // Update all parts
+        this.parts.forEach(part => part.update(gravity, friction));
+
+        // Constrain joints multiple times for stability
+        for (let i = 0; i < 3; i++) {
+          this.joints.forEach(joint => joint.constrain());
+        }
+      },
+
+      draw() {
+        this.joints.forEach(joint => joint.draw());
+        this.parts.forEach(part => part.draw());
+      },
+
+      getPart(x, y) {
+        for (let part of this.parts) {
+          const dx = x - part.x;
+          const dy = y - part.y;
+          if (Math.sqrt(dx * dx + dy * dy) < part.radius + 10) {
+            return part;
+          }
+        }
+        return null;
+      }
     };
 
-    // CREATE THE RAGDOLL!
-    let ragdoll = createRagdoll(canvas.width / 2, 250);
-    console.log('✅ RAGDOLL CREATED with', ragdoll.bodies.length, 'body parts');
+    ragdoll.create(canvas.width / 2, 250);
 
-    // Collision detection for damage
-    Events.on(engine, 'afterUpdate', () => {
-      const allBodies = Composite.allBodies(world);
-      
-      allBodies.forEach(body => {
-        if (body.velocity.x * body.velocity.x + body.velocity.y * body.velocity.y > 100) {
-          if (body.label === 'guy') {
-            const damage = Math.min(Math.floor((body.velocity.x ** 2 + body.velocity.y ** 2) / 50000) * damageMultiplier, 50);
-            if (damage > 0 && body.damageTimer === undefined) {
-              guyHealth -= damage;
+    let objects = [];
+    const gravity = 0.4;
+    const friction = 0.99;
+
+    function update() {
+      ragdoll.update(gravity, friction);
+
+      objects.forEach((obj, idx) => {
+        obj.vy += gravity * 0.5;
+        obj.vx *= friction;
+        obj.vy *= friction;
+
+        obj.x += obj.vx;
+        obj.y += obj.vy;
+
+        if (obj.x - obj.size < 20) { obj.x = 20 + obj.size; obj.vx *= -0.6; }
+        if (obj.x + obj.size > canvas.width - 20) { obj.x = canvas.width - 20 - obj.size; obj.vx *= -0.6; }
+        if (obj.y + obj.size > canvas.height - 20) { obj.y = canvas.height - 20 - obj.size; obj.vy *= -0.5; }
+
+        // Check collisions with all ragdoll parts
+        ragdoll.parts.forEach(part => {
+          const dx = obj.x - part.x;
+          const dy = obj.y - part.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const minDist = obj.size + part.radius;
+
+          if (dist < minDist && dist > 0) {
+            const damage = Math.floor(Math.sqrt(obj.vx * obj.vx + obj.vy * obj.vy) / 2.5);
+            if (damage > 0) {
+              health -= damage;
               money += damage * 2;
-              updateDisplay();
-              showDamagePopup(body.position.x, body.position.y, damage);
-              showMoneyPopup(body.position.x, body.position.y, damage * 2);
-              body.damageTimer = 10;
+              updateUI();
+
+              // Push part
+              const angle = Math.atan2(dy, dx);
+              part.vx += Math.cos(angle) * 8;
+              part.vy += Math.sin(angle) * 8;
+
+              // Push object back
+              obj.vx -= Math.cos(angle) * 4;
+              obj.vy -= Math.sin(angle) * 4;
             }
+
+            if (health <= 0) health = 0;
           }
+        });
+
+      });
+
+      objects = objects.filter(obj => obj.y <= canvas.height + 100);
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Ground
+      ctx.fillStyle = '#00ff00';
+      ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(0, canvas.height - 20, canvas.width, 20);
+
+      // Walls
+      ctx.fillStyle = '#ff00ff';
+      ctx.fillRect(0, 0, 20, canvas.height);
+      ctx.fillRect(canvas.width - 20, 0, 20, canvas.height);
+
+      // Draw ragdoll
+      ragdoll.draw();
+
+      // Draw objects
+      objects.forEach(obj => {
+        if (obj.type === 'ball') {
+          ctx.fillStyle = '#ffe66d';
+          ctx.strokeStyle = '#ff9800';
+        } else if (obj.type === 'box') {
+          ctx.fillStyle = '#a78bfa';
+          ctx.strokeStyle = '#7c3aed';
+        } else if (obj.type === 'spike') {
+          ctx.fillStyle = '#ff6b6b';
+          ctx.strokeStyle = '#ff0000';
+        } else if (obj.type === 'explosive') {
+          ctx.fillStyle = '#ff00ff';
+          ctx.strokeStyle = '#ff0088';
         }
-        if (body.damageTimer !== undefined) {
-          body.damageTimer--;
-          if (body.damageTimer <= 0) {
-            delete body.damageTimer;
-          }
+
+        ctx.lineWidth = 2;
+
+        if (obj.type === 'ball' || obj.type === 'spike' || obj.type === 'explosive') {
+          ctx.beginPath();
+          ctx.arc(obj.x, obj.y, obj.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          ctx.fillRect(obj.x - obj.size, obj.y - obj.size, obj.size * 2, obj.size * 2);
+          ctx.strokeRect(obj.x - obj.size, obj.y - obj.size, obj.size * 2, obj.size * 2);
         }
       });
 
-      if (guyHealth <= 0) {
-        guyHealth = 0;
-      }
-    });
+      // Health bar
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(20, 20, 200, 20);
+      ctx.fillStyle = health > 30 ? '#4ecdc4' : '#ff6b6b';
+      ctx.fillRect(22, 22, (health / 100) * 196, 16);
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(20, 20, 200, 20);
 
-    // Mouse drag
-    canvas.addEventListener('mousedown', (e) => {
-      const pos = { x: e.clientX, y: e.clientY - 80 };
-      const allBodies = Composite.allBodies(world);
-      
-      for (let body of allBodies) {
-        if (body.label === 'guy') {
-          const d = Math.sqrt((body.position.x - pos.x) ** 2 + (body.position.y - pos.y) ** 2);
-          if (d < 200) {  // HUGE grab radius
-            draggedBody = body;
-            console.log('✅ GRABBED body at', d, 'pixels away');
-            break;
-          }
-        }
-      }
-    });
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText(`Health: ${health}`, 25, 38);
+    }
 
-    canvas.addEventListener('mousemove', (e) => {
-      if (draggedBody) {
-        Body.setPosition(draggedBody, {
-          x: e.clientX,
-          y: e.clientY - 80
-        });
-        // Apply velocity for more interactive dragging
-        Body.setVelocity(draggedBody, {
-          x: (e.clientX - draggedBody.positionPrev.x) * 0.05,
-          y: (e.clientY - 80 - draggedBody.positionPrev.y) * 0.05
-        });
-      }
-    });
+    function gameLoop() {
+      update();
+      render();
+      requestAnimationFrame(gameLoop);
+    }
 
-    canvas.addEventListener('mouseup', () => {
-      draggedBody = null;
-    });
+    function updateUI() {
+      document.getElementById('moneyDisplay').textContent = `💰 $${money}`;
+      document.getElementById('statMoney').textContent = `$${money}`;
+      document.getElementById('statHealth').textContent = health;
+      document.getElementById('statItems').textContent = itemsSpawned;
+      localStorage.setItem('physicsGameMoney', money);
+    }
 
-    // Touch support
-    canvas.addEventListener('touchstart', (e) => {
-      const pos = { x: e.touches[0].clientX, y: e.touches[0].clientY - 80 };
-      const allBodies = Composite.allBodies(world);
-      
-      for (let body of allBodies) {
-        if (body.label === 'guy') {
-          const d = Math.sqrt((body.position.x - pos.x) ** 2 + (body.position.y - pos.y) ** 2);
-          if (d < 120) {
-            draggedBody = body;
-            break;
-          }
-        }
-      }
-    });
-
-    canvas.addEventListener('touchmove', (e) => {
-      if (draggedBody && e.touches[0]) {
-        Body.setPosition(draggedBody, {
-          x: e.touches[0].clientX,
-          y: e.touches[0].clientY - 80
-        });
-        Body.setVelocity(draggedBody, {
-          x: (e.touches[0].clientX - draggedBody.positionPrev.x) * 0.05,
-          y: (e.touches[0].clientY - 80 - draggedBody.positionPrev.y) * 0.05
-        });
-      }
-    });
-
-    canvas.addEventListener('touchend', () => {
-      draggedBody = null;
-    });
-
-    // Shop functions
     window.buyItem = function(type) {
-      const prices = { ball: 5, box: 10, explosive: 25, spike: 15, hammer: 20 };
-      const multipliers = { ball: 1, box: 1, explosive: 3, spike: 2, hammer: 2.5 };
+      const prices = { ball: 5, box: 10, spike: 15, explosive: 25 };
 
       if (money < prices[type]) {
         alert('Not enough money!');
@@ -884,275 +386,63 @@
       }
 
       money -= prices[type];
-      damageMultiplier += 0.1;
-
-      // Spawn items
-      const spawnX = Math.random() * (canvas.width - 100) + 50;
-      const spawnY = 100;
-
-      if (type === 'ball') {
-        const ball = Bodies.circle(spawnX, spawnY, 15, {
-          density: 0.002,
-          restitution: 0.8,
-          friction: 0.3,
-          label: 'projectile'
-        });
-        World.add(world, ball);
-        items.push(ball);
-      } else if (type === 'box') {
-        const box = Bodies.rectangle(spawnX, spawnY, 30, 30, {
-          density: 0.005,
-          restitution: 0.4,
-          friction: 0.6,
-          label: 'projectile'
-        });
-        World.add(world, box);
-        items.push(box);
-      } else if (type === 'spike') {
-        const spike = Bodies.circle(spawnX, spawnY, 12, {
-          density: 0.003,
-          restitution: 0.9,
-          friction: 0.2,
-          label: 'projectile'
-        });
-        World.add(world, spike);
-        items.push(spike);
-      } else if (type === 'hammer') {
-        const hammer = Bodies.rectangle(spawnX, spawnY, 40, 15, {
-          density: 0.008,
-          restitution: 0.5,
-          friction: 0.7,
-          label: 'projectile'
-        });
-        World.add(world, hammer);
-        items.push(hammer);
-      } else if (type === 'explosive') {
-        const explosive = Bodies.circle(spawnX, spawnY, 18, {
-          density: 0.004,
-          restitution: 0.7,
-          friction: 0.4,
-          label: 'projectile'
-        });
-        World.add(world, explosive);
-        items.push(explosive);
-      }
-
       itemsSpawned++;
-      updateDisplay();
+
+      const obj = {
+        x: Math.random() * (canvas.width - 100) + 50,
+        y: 50,
+        vx: (Math.random() - 0.5) * 6,
+        vy: 0,
+        type: type,
+        size: type === 'explosive' ? 18 : (type === 'spike' ? 12 : (type === 'box' ? 14 : 11))
+      };
+
+      objects.push(obj);
+      updateUI();
     };
 
-    window.resetGame = function() {
-      ragdoll.bodies.forEach(body => {
-        Body.setPosition(body, {
-          x: body.position.x,
-          y: body.position.y - 200
-        });
-        Body.setVelocity(body, { x: 0, y: 0 });
-      });
-      guyHealth = 100;
-      updateDisplay();
-    };
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
 
-    function updateDisplay() {
-      document.getElementById('moneyDisplay').textContent = `💰 $${money}`;
-      document.getElementById('statMoney').textContent = `$${money}`;
-      document.getElementById('statHP').textContent = `${Math.max(0, guyHealth)}`;
-      document.getElementById('statItems').textContent = `${itemsSpawned}`;
-      localStorage.setItem('physicsGameMoney', money);
-    }
-
-    function showDamagePopup(x, y, damage) {
-      const popup = document.createElement('div');
-      popup.className = 'damage-popup';
-      popup.textContent = `-${damage} HP`;
-      popup.style.left = x + 'px';
-      popup.style.top = (y + 80) + 'px';
-      document.body.appendChild(popup);
-      setTimeout(() => popup.remove(), 1000);
-    }
-
-    function showMoneyPopup(x, y, amount) {
-      const popup = document.createElement('div');
-      popup.className = 'money-popup';
-      popup.textContent = `+$${amount}`;
-      popup.style.left = x + 'px';
-      popup.style.top = (y + 80) + 'px';
-      document.body.appendChild(popup);
-      setTimeout(() => popup.remove(), 1000);
-    }
-
-    // Render loop
-    function render() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw ground - BRIGHT AND VISIBLE
-      ctx.fillStyle = '#00ff00';
-      ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(0, canvas.height - 20, canvas.width, 20);
-
-      // Draw walls
-      ctx.fillStyle = '#ff00ff';
-      ctx.fillRect(0, 0, 20, canvas.height);
-      ctx.fillRect(canvas.width - 20, 0, 20, canvas.height);
-
-      // Draw constraints (joints)
-      ctx.strokeStyle = 'rgba(255, 107, 107, 0.5)';
-      ctx.lineWidth = 3;
-      ragdoll.constraints.forEach(constraint => {
-        ctx.beginPath();
-        ctx.moveTo(constraint.bodyA.position.x, constraint.bodyA.position.y);
-        ctx.lineTo(constraint.bodyB.position.x, constraint.bodyB.position.y);
-        ctx.stroke();
-      });
-
-      // Draw guy - 15 body parts
-      const partColors = [
-        '#ffdbac', // 0: Head
-        '#ff6b6b', // 1: Upper Torso
-        '#ff5252', // 2: Lower Torso
-        '#ffdbac', // 3: Left Upper Arm
-        '#ffdbac', // 4: Left Forearm
-        '#ffdbac', // 5: Left Hand
-        '#ffdbac', // 6: Right Upper Arm
-        '#ffdbac', // 7: Right Forearm
-        '#ffdbac', // 8: Right Hand
-        '#4a4a4a', // 9: Left Upper Leg
-        '#3a3a3a', // 10: Left Lower Leg
-        '#2a2a2a', // 11: Left Foot
-        '#4a4a4a', // 12: Right Upper Leg
-        '#3a3a3a', // 13: Right Lower Leg
-        '#2a2a2a'  // 14: Right Foot
-      ];
-
-      ragdoll.bodies.forEach((body, index) => {
-        const dims = bodyDimensions[index];
-        
-        ctx.save();
-        ctx.translate(body.position.x, body.position.y);
-        ctx.rotate(body.angle);
-
-        ctx.fillStyle = partColors[index];
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 3;
-
-        if (dims.type === 'circle') {
-          // Draw circle
-          ctx.beginPath();
-          ctx.arc(0, 0, dims.radius, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-          
-          // Special face for head
-          if (index === 0) {
-            ctx.fillStyle = '#000';
-            ctx.fillRect(-16, -10, 8, 8);
-            ctx.fillRect(8, -10, 8, 8);
-            
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(0, 8, 14, 0, Math.PI);
-            ctx.stroke();
-          }
-        } else {
-          // Draw rectangle
-          const halfW = dims.w / 2;
-          const halfH = dims.h / 2;
-          ctx.fillRect(-halfW, -halfH, dims.w, dims.h);
-          ctx.strokeRect(-halfW, -halfH, dims.w, dims.h);
-        }
-
-        ctx.restore();
-      });
-
-      // Draw items
-      items.forEach((item, index) => {
-        ctx.save();
-        ctx.translate(item.position.x, item.position.y);
-        ctx.rotate(item.angle);
-
-        if (item.circleRadius) {
-          ctx.fillStyle = '#ffe66d';
-          ctx.strokeStyle = '#ff9800';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.arc(0, 0, item.circleRadius, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-        } else {
-          ctx.fillStyle = '#a78bfa';
-          ctx.strokeStyle = '#7c3aed';
-          ctx.lineWidth = 2;
-          const vertices = item.vertices;
-          ctx.beginPath();
-          ctx.moveTo(vertices[0].x - item.position.x, vertices[0].y - item.position.y);
-          for (let i = 1; i < vertices.length; i++) {
-            ctx.lineTo(vertices[i].x - item.position.x, vertices[i].y - item.position.y);
-          }
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-        }
-
-        ctx.restore();
-
-        // Remove items that fall off screen
-        if (item.position.y > canvas.height + 100) {
-          World.remove(world, item);
-          items.splice(index, 1);
-        }
-      });
-
-      // Draw health bar
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-      ctx.fillRect(20, 100, 200, 20);
-      ctx.fillStyle = guyHealth > 30 ? '#4ecdc4' : '#ff6b6b';
-      ctx.fillRect(22, 102, (guyHealth / 100) * 196, 16);
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(20, 100, 200, 20);
-      ctx.fillStyle = '#333';
-      ctx.font = 'bold 14px Arial';
-      ctx.fillText('Guy Health', 25, 115);
-
-      // Debug: Show character position
-      if (ragdoll.bodies.length > 0) {
-        const head = ragdoll.bodies[0];
-        
-        // Draw bright test circle around head
-        ctx.strokeStyle = '#ffff00';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.arc(head.position.x, head.position.y, 80, 0, Math.PI * 2);
-        ctx.stroke();
-        
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(20, 130, 350, 50);
-        ctx.fillStyle = '#ffff00';
-        ctx.font = 'bold 16px Arial';
-        ctx.fillText(`🎯 CHARACTER HERE: (${Math.round(head.position.x)}, ${Math.round(head.position.y)})`, 25, 150);
-        ctx.fillText(`PARTS: ${ragdoll.bodies.length}  HEALTH: ${Math.max(0, guyHealth)}`, 25, 172);
+      const part = ragdoll.getPart(mouseX, mouseY);
+      if (part) {
+        ragdoll.isDragged = true;
+        ragdoll.draggedPart = part;
       }
-    }
-
-    // Update and render loop
-    function loop() {
-      Engine.update(engine);
-      render();
-      requestAnimationFrame(loop);
-    }
-
-    loop();
-
-    // Handle window resize
-    window.addEventListener('resize', () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight - 80;
     });
 
-    updateDisplay();
+    canvas.addEventListener('mousemove', (e) => {
+      if (ragdoll.isDragged && ragdoll.draggedPart) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        ragdoll.draggedPart.vx = (mouseX - ragdoll.draggedPart.x) * 0.5;
+        ragdoll.draggedPart.vy = (mouseY - ragdoll.draggedPart.y) * 0.5;
+        ragdoll.draggedPart.x = mouseX;
+        ragdoll.draggedPart.y = mouseY;
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      ragdoll.isDragged = false;
+      ragdoll.draggedPart = null;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      ragdoll.isDragged = false;
+      ragdoll.draggedPart = null;
+    });
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight - 60;
+    });
+
+    updateUI();
+    gameLoop();
   </script>
 </body>
 </html>
