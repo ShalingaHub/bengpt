@@ -674,7 +674,7 @@
 You are having a conversation with ${otherNames} about: "${topic}"
 
 IMPORTANT:
-- Keep your response to 1-3 sentences max
+- Keep your response to 1-3 sentences max (per character)
 - Stay in character and respond naturally
 - Don't repeat what was just said
 - React to what others say, don't just add random thoughts`;
@@ -700,32 +700,34 @@ IMPORTANT:
                 ]
               }
             ],
-            temperature: 0.9,
-            topP: 0.95,
-            maxOutputTokens: 150
+            generationConfig: {
+              temperature: 0.9,
+              topP: 0.95,
+              maxOutputTokens: 150
+            }
           })
         });
 
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(`API error: ${response.status} ${errorText}`);
+          console.error('Response:', errorText);
+          throw new Error(`API error: ${response.status}`);
         }
 
         const data = await response.json();
-        const candidateText = data?.candidates?.[0]?.content?.[0]?.text
-          || data?.candidates?.[0]?.content?.parts?.[0]?.text
-          || data?.candidates?.[0]?.output
-          || data?.candidates?.[0]?.output?.[0]?.content?.[0]?.text
-          || data?.output?.[0]?.content?.[0]?.text
-          || data?.content?.[0]?.text;
+        console.log('API Response:', data);
+        
+        // Get text from response
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-        if (candidateText) {
-          return candidateText.trim();
+        if (text) {
+          return text.trim();
         }
 
-        throw new Error(`No response: ${JSON.stringify(data)}`);
+        throw new Error(`No text in response`);
       } catch (error) {
         console.error('API error:', error);
+        showToast(`Error: ${error.message}`);
         return null;
       }
     }
