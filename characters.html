@@ -545,8 +545,10 @@
   </div>
 
   <script>
-    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta1/models/gemini-flash-latest:generateContent';
-    const GEMINI_API_KEY = 'AQ.Ab8RN6KlnORi59gTaGHy7I0Qwk4RtD668HwKzZBzB_2lRa2v1g';
+    // Direct Gemini API - Free Tier
+    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta1/models/gemini-1.5-flash-latest:generateContent';
+    // Get your free API key from: https://aistudio.google.com/app/apikey
+    const GEMINI_API_KEY = 'AQ.Ab8RN6KO2Y5VpqvwxCS2ol3spgs-JKFqJGBK65MXjYpHuCz1BA'; // Replace this with your actual key
 
     let characters = [];
     let conversation = [];
@@ -674,7 +676,6 @@ You are having a conversation with ${otherNames} about: "${topic}"
 IMPORTANT:
 - Keep your response to 1-3 sentences max
 - Stay in character and respond naturally
-- Make it in theme with the character
 - Don't repeat what was just said
 - React to what others say, don't just add random thoughts`;
 
@@ -692,7 +693,13 @@ IMPORTANT:
             'X-goog-api-key': GEMINI_API_KEY,
           },
           body: JSON.stringify({
-            promptText,
+            contents: [
+              {
+                parts: [
+                  { text: promptText }
+                ]
+              }
+            ],
             temperature: 0.9,
             topP: 0.95,
             maxOutputTokens: 150
