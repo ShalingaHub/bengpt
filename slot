@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clover Pit • Slot Machine Rogue</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, system-ui, system-ui, Arial, sans-serif;
+      background: #05080f;
+      color: #eef2ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, rgba(167, 139, 250, 0.22), transparent 25%),
+                  radial-gradient(circle at bottom right, rgba(79, 70, 229, 0.18), transparent 30%),
+                  linear-gradient(180deg, #090b14 0%, #06080e 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(45deg, rgba(255,255,255,0.02), rgba(255,255,255,0.02) 1px, transparent 1px, transparent 10px);
+      pointer-events: none;
+      opacity: 0.18;
+      z-index: 0;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 22px 28px;
+      background: rgba(7, 8, 18, 0.96);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(8px);
+    }
+
+    .header-title {
+      margin: 0;
+      font-size: clamp(1.4rem, 2vw, 2.1rem);
+      letter-spacing: -0.03em;
+    }
+
+    .header-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .header-controls a,
+    .header-controls button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .header-controls button:hover,
+    .header-controls a:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.16);
+    }
+
+    .header-controls .money-badge {
+      min-width: 126px;
+      text-align: center;
+      background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+      color: #08070c;
+      box-shadow: 0 16px 40px rgba(139, 92, 246, 0.22);
+    }
+
+    .page-layout {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 28px;
+      display: grid;
+      grid-template-columns: minmax(300px, 1fr) minmax(340px, 420px);
+      gap: 26px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .machine-card,
+    .panel-card,
+    .shop-card,
+    .log-card {
+      border-radius: 28px;
+      padding: 24px;
+      background: rgba(10, 12, 23, 0.9);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(12px);
+    }
+
+    .machine-card {
+      grid-column: 1 / -1;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(7, 8, 18, 0.94));
+      min-height: 520px;
+    }
+
+    .machine-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at bottom center, rgba(99,102,241,0.18), transparent 35%);
+      pointer-events: none;
+    }
+
+    .machine-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .machine-top h2 {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .machine-top p {
+      margin: 10px 0 0;
+      max-width: 600px;
+      color: rgba(238,242,255,0.78);
+      line-height: 1.6;
+    }
+
+    .machine-board {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin: 0 auto 16px;
+      padding: 16px;
+      max-width: 860px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.45));
+      border: 1px solid rgba(255,255,255,0.10);
+      position: relative;
+    }
+
+    .machine-board::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(236, 72, 153, 0.08), transparent 30%);
+      pointer-events: none;
+    }
+
+    .reels {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 680px;
+      padding: 10px;
+    }
+
+    .reel {
+      min-height: 220px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #131a2f 0%, #0c1221 100%);
+      border: 2px solid rgba(139, 92, 246, 0.18);
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+    }
+
+    .reel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(transparent 0%, rgba(255,255,255,0.08) 15%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.08) 85%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .reel-display {
+      font-size: clamp(3rem, 4vw, 5.4rem);
+      line-height: 1;
+      z-index: 1;
+      text-shadow: 0 0 32px rgba(255,255,255,0.14);
+    }
+
+    .machine-status {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .status-tile {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .status-tile span {
+      display: block;
+      margin-top: 8px;
+      font-size: 0.95rem;
+      color: rgba(238,242,255,0.72);
+    }
+
+    .status-tile strong {
+      display: block;
+      font-size: 1.4rem;
+      margin-top: 8px;
+      color: #fff;
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 22px;
+      justify-content: center;
+    }
+
+    .spin-button,
+    .cashout-button {
+      min-width: 150px;
+      padding: 18px 28px;
+      border: none;
+      border-radius: 20px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 18px 36px rgba(79, 70, 229, 0.24);
+      transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .spin-button {
+      color: #08070c;
+      background: linear-gradient(135deg, #f472b6, #c084fc);
+    }
+
+    .spin-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    .cashout-button {
+      color: #fff;
+      background: rgba(99,102,241,0.16);
+    }
+
+    .cashout-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      filter: brightness(1.08);
+    }
+
+    .spin-button:disabled,
+    .cashout-button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .result-banner {
+      margin-top: 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 16px;
+      background: rgba(255,255,255,0.04);
+      color: #d1d5db;
+      min-height: 72px;
+      display: grid;
+      place-content: center;
+      text-align: center;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .panel-card {
+      min-height: 420px;
+    }
+
+    .panel-card h3,
+    .shop-card h3,
+    .log-card h3 {
+      margin: 0 0 18px;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .panel-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .panel-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .panel-item label {
+      display: block;
+      color: rgba(238,242,255,0.72);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .panel-item strong {
+      font-size: 1.2rem;
+      color: #fff;
+      display: block;
+    }
+
+    .shop-card {
+      display: grid;
+      gap: 16px;
+      position: sticky;
+      top: 90px;
+    }
+
+    .shop-list,
+    .perk-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .shop-item,
+    .perk-item {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .shop-item-title,
+    .perk-item-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 700;
+      color: #fff;
+      font-size: 0.98rem;
+    }
+
+    .shop-item-description,
+    .perk-item-description {
+      color: rgba(238,242,255,0.72);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .buy-button {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      color: #08070c;
+      background: linear-gradient(135deg, #22d3ee, #8b5cf6);
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .buy-button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .buy-button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.65);
+    }
+
+    .log-card {
+      grid-column: 1 / -1;
+      max-height: 280px;
+      overflow: hidden;
+    }
+
+    .log-list {
+      max-height: 220px;
+      overflow-y: auto;
+      display: grid;
+      gap: 10px;
+      padding-right: 8px;
+    }
+
+    .log-entry {
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #dbeafe;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .log-entry.positive {
+      color: #d9f99d;
+    }
+
+    .log-entry.negative {
+      color: #fda4af;
+    }
+
+    .game-over {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(4, 7, 20, 0.92);
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .game-over.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .game-over-panel {
+      max-width: 520px;
+      width: 100%;
+      padding: 32px;
+      border-radius: 28px;
+      background: rgba(13, 15, 30, 0.95);
+      border: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    .game-over-panel h3 {
+      margin: 0 0 16px;
+      font-size: 2rem;
+      letter-spacing: -0.04em;
+    }
+
+    .game-over-panel p {
+      margin: 0 0 24px;
+      color: rgba(238,242,255,0.75);
+      line-height: 1.7;
+    }
+
+    .game-over-panel button {
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 18px;
+      border: none;
+      color: #fff;
+      background: linear-gradient(135deg, #f472b6, #8b5cf6);
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    @media (max-width: 1080px) {
+      .page-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .shop-card {
+        position: static;
+        top: auto;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .machine-board {
+        flex-direction: column;
+      }
+
+      .reels {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .machine-status {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1 class="header-title">🍀 Clover Pit</h1>
+      <p style="margin:6px 0 0; color: rgba(238,242,255,0.72);">A rogue-like slot machine adventure with upgrades, perks, and escalating payouts.</p>
+    </div>
+    <div class="header-controls">
+      <div class="money-badge" id="headerBank">Bank $0</div>
+      <a href="index.html">← Back</a>
+    </div>
+  </header>
+
+  <main class="page-layout">
+    <section class="machine-card">
+      <div class="machine-top">
+        <div>
+          <h2>Spin the neon reels</h2>
+          <p>Collect coins, unlock machine upgrades, and keep your run alive long enough to hit the big jackpots.</p>
+        </div>
+        <div class="status-tile" style="min-width: 180px;">
+          <label>Run Balance</label>
+          <strong id="runBalance">$0</strong>
+        </div>
+      </div>
+
+      <div class="machine-board">
+        <div class="reels">
+          <div class="reel" id="reel1"><div class="reel-display">🍀</div></div>
+          <div class="reel" id="reel2"><div class="reel-display">🍀</div></div>
+          <div class="reel" id="reel3"><div class="reel-display">🍀</div></div>
+        </div>
+      </div>
+
+      <div class="machine-status">
+        <div class="status-tile">
+          <label>Spin Cost</label>
+          <strong id="spinCost">$0</strong>
+        </div>
+        <div class="status-tile">
+          <label>Multiplier</label>
+          <strong id="multiplierValue">x1.0</strong>
+        </div>
+        <div class="status-tile">
+          <label>Run Streak</label>
+          <strong id="streakValue">0</strong>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="spin-button" id="spinButton">SPIN</button>
+        <button class="cashout-button" id="cashoutButton">Cash Out</button>
+      </div>
+
+      <div class="result-banner" id="resultBanner">Welcome to Clover Pit. Press SPIN to start your streak.</div>
+    </section>
+
+    <aside class="panel-card">
+      <h3>Run Summary</h3>
+      <div class="panel-grid">
+        <div class="panel-item">
+          <label>Total Spins</label>
+          <strong id="spinCount">0</strong>
+        </div>
+        <div class="panel-item">
+          <label>Big Wins</label>
+          <strong id="bigWins">0</strong>
+        </div>
+        <div class="panel-item">
+          <label>Jackpot Boost</label>
+          <strong id="jackpotBoost">0%</strong>
+        </div>
+        <div class="panel-item">
+          <label>Cashback</label>
+          <strong id="cashbackValue">0%</strong>
+        </div>
+      </div>
+    </aside>
+
+    <aside class="shop-card">
+      <h3>Upgrade Machine</h3>
+      <div class="shop-list" id="upgradeList"></div>
+    </aside>
+
+    <aside class="shop-card">
+      <h3>Buy Perks</h3>
+      <div class="perk-list" id="perkList"></div>
+    </aside>
+
+    <section class="log-card">
+      <h3>Spin Log</h3>
+      <div class="log-list" id="logList"></div>
+    </section>
+  </main>
+
+  <div class="game-over" id="gameOverModal">
+    <div class="game-over-panel">
+      <h3>Game Over</h3>
+      <p>Your run has ended, but permanent upgrades remain. Cash out what you can and take another spin through Clover Pit.</p>
+      <button id="restartButton">Restart Run</button>
+    </div>
+  </div>
+
+  <script>
+    const symbols = [
+      { id: '🍀', label: 'Clover', value: 15, weight: 10 },
+      { id: '7️⃣', label: 'Lucky Seven', value: 280, weight: 2.2 },
+      { id: '💎', label: 'Diamond', value: 110, weight: 4 },
+      { id: '🍒', label: 'Cherry', value: 60, weight: 6 },
+      { id: '⭐', label: 'Star', value: 35, weight: 8 },
+      { id: 'BAR', label: 'BAR', value: 22, weight: 10 }
+    ];
+
+    const defaultState = {
+      bank: 700,
+      runCash: 180,
+      spinCount: 0,
+      bigWins: 0,
+      streak: 0,
+      jackpots: 0,
+      lastResult: 'Welcome to Clover Pit. Spin for a lucky run!',
+      isSpinning: false,
+      upgrades: {
+        speed: 0,
+        jackpot: 0,
+        odds: 0,
+        cashback: 0,
+        wallet: 0
+      },
+      perks: {
+        luckyCharm: false,
+        secondChance: false,
+        cloverRush: false
+      },
+      freeSecondChance: true
+    };
+
+    const upgradeData = [
+      {
+        id: 'speed',
+        name: 'Faster Reels',
+        description: 'Shorten spin time for a quicker, more thrilling machine.',
+        baseCost: 130,
+        maxLevel: 3
+      },
+      {
+        id: 'jackpot',
+        name: 'Jackpot Boost',
+        description: 'Raise payout for top combos and mega sevens.',
+        baseCost: 200,
+        maxLevel: 4
+      },
+      {
+        id: 'odds',
+        name: 'Lucky Weights',
+        description: 'Improve odds for higher payout symbols each level.',
+        baseCost: 160,
+        maxLevel: 4
+      },
+      {
+        id: 'cashback',
+        name: 'Cashback Converter',
+        description: 'Gain a portion of your spin cost back on losing spins.',
+        baseCost: 180,
+        maxLevel: 3
+      },
+      {
+        id: 'wallet',
+        name: 'Bank Reserve',
+        description: 'Boost cashout value and starting run balance.',
+        baseCost: 240,
+        maxLevel: 3
+      }
+    ];
+
+    const perkData = [
+      {
+        id: 'luckyCharm',
+        name: 'Lucky Charm',
+        description: 'A chance to upgrade one reel to a lucky seven on each spin.',
+        cost: 360
+      },
+      {
+        id: 'secondChance',
+        name: 'Second Chance',
+        description: 'Survive one losing spin per run and keep your streak alive.',
+        cost: 300
+      },
+      {
+        id: 'cloverRush',
+        name: 'Clover Rush',
+        description: 'Clover triples are worth even more when the pit is ripe.',
+        cost: 320
+      }
+    ];
+
+    const state = loadState();
+
+    const reelEls = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+    const runBalanceEl = document.getElementById('runBalance');
+    const headerBankEl = document.getElementById('headerBank');
+    const spinCostEl = document.getElementById('spinCost');
+    const multiplierEl = document.getElementById('multiplierValue');
+    const streakEl = document.getElementById('streakValue');
+    const spinCountEl = document.getElementById('spinCount');
+    const bigWinsEl = document.getElementById('bigWins');
+    const jackpotBoostEl = document.getElementById('jackpotBoost');
+    const cashbackValueEl = document.getElementById('cashbackValue');
+    const resultBanner = document.getElementById('resultBanner');
+    const spinButton = document.getElementById('spinButton');
+    const cashoutButton = document.getElementById('cashoutButton');
+    const logList = document.getElementById('logList');
+    const upgradeList = document.getElementById('upgradeList');
+    const perkList = document.getElementById('perkList');
+    const gameOverModal = document.getElementById('gameOverModal');
+    const restartButton = document.getElementById('restartButton');
+
+    updateUI();
+    renderShop();
+    renderPerks();
+    addLog(state.lastResult, 'neutral');
+
+    spinButton.addEventListener('click', handleSpin);
+    cashoutButton.addEventListener('click', handleCashOut);
+    restartButton.addEventListener('click', () => {
+      state.runCash = getStartingRunCash();
+      state.streak = 0;
+      state.freeSecondChance = true;
+      state.lastResult = 'Restarted run. Hit the reels and build momentum.';
+      hideGameOver();
+      updateUI();
+      addLog(state.lastResult, 'positive');
+      saveState();
+    });
+
+    function getStartingRunCash() {
+      return 180 + state.upgrades.wallet * 20;
+    }
+
+    function loadState() {
+      const stored = localStorage.getItem('cloverPitState');
+      if (!stored) return { ...defaultState };
+      try {
+        return JSON.parse(stored);
+      } catch (error) {
+        return { ...defaultState };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem('cloverPitState', JSON.stringify(state));
+    }
+
+    function formatMoney(value) {
+      return '$' + Math.max(0, Math.round(value)).toLocaleString();
+    }
+
+    function getRandomSymbol() {
+      const oddsBonus = state.upgrades.odds * 0.1;
+      const roll = Math.random();
+      const weighted = symbols.map(item => ({ ...item, score: item.weight + (item.id === '7️⃣' ? 0.1 * state.upgrades.jackpot : 0) + (item.id === '💎' ? oddsBonus * 2 : 0) }));
+      const total = weighted.reduce((sum, entry) => sum + entry.score, 0);
+      let cursor = roll * total;
+      return weighted.find(entry => {
+        cursor -= entry.score;
+        return cursor <= 0;
+      });
+    }
+
+    function calculateSpinCost() {
+      const discount = state.upgrades.wallet * 0.15;
+      return Math.max(12, Math.round(25 * (1 - discount)));
+    }
+
+    function getMultiplier() {
+      return (1 + state.upgrades.jackpot * 0.2).toFixed(1);
+    }
+
+    function getPayback() {
+      return state.upgrades.cashback * 0.08;
+    }
+
+    function getJackpotBoost() {
+      return state.upgrades.jackpot * 20;
+    }
+
+    function getSkillBonus() {
+      return 1 + state.upgrades.odds * 0.08;
+    }
+
+    function handleSpin() {
+      if (state.isSpinning) return;
+      const cost = calculateSpinCost();
+      if (state.runCash < cost) {
+        addResult('Not enough run cash to spin. Cash out and restart for a fresh run.');
+        return;
+      }
+
+      state.runCash -= cost;
+      state.spinCount += 1;
+      state.isSpinning = true;
+      spinButton.disabled = true;
+      cashoutButton.disabled = true;
+
+      const finalSymbols = [getRandomSymbol(), getRandomSymbol(), getRandomSymbol()];
+      if (state.perks.luckyCharm && Math.random() < 0.18) {
+        const target = Math.floor(Math.random() * 3);
+        finalSymbols[target] = symbols.find(item => item.id === '7️⃣');
+      }
+
+      const reelSpeeds = [1100, 1300, 1450].map(base => Math.max(500, base - state.upgrades.speed * 120));
+      reelEls.forEach((reel, index) => {
+        const display = reel.querySelector('.reel-display');
+        startReelSpin(display, reelSpeeds[index], finalSymbols[index].id);
+      });
+
+      const spinDuration = Math.max(...reelSpeeds) + 120;
+      setTimeout(() => {
+        const payout = resolveSpin(finalSymbols);
+        state.runCash += payout;
+        state.isSpinning = false;
+        spinButton.disabled = false;
+        cashoutButton.disabled = false;
+        updateUI();
+        saveState();
+        if (state.runCash <= 0) {
+          showGameOver();
+        }
+      }, spinDuration);
+
+      updateUI();
+    }
+
+    function startReelSpin(display, duration, finalSymbol) {
+      const spinFrames = Math.ceil(duration / 80);
+      let frame = 0;
+      const tick = setInterval(() => {
+        frame += 1;
+        display.textContent = symbols[Math.floor(Math.random() * symbols.length)].id;
+        if (frame >= spinFrames) {
+          clearInterval(tick);
+          display.textContent = finalSymbol;
+        }
+      }, 80);
+    }
+
+    function resolveSpin(result) {
+      const symbolsOnly = result.map(item => item.id);
+      const symbolCounts = symbolsOnly.reduce((acc, symbol) => ({ ...acc, [symbol]: (acc[symbol] || 0) + 1 }), {});
+      let payout = 0;
+      let message = '';
+      const multiplier = 1 + state.upgrades.jackpot * 0.14;
+      const skill = getSkillBonus();
+
+      if (Object.keys(symbolCounts).length === 1) {
+        const symbol = symbols.find(item => item.id === symbolsOnly[0]);
+        payout = Math.round(symbol.value * 2.2 * multiplier * skill);
+        if (symbol.id === '7️⃣') {
+          payout += 120;
+          state.bigWins += 1;
+          message = `JACKPOT! Triple 7s pay ${formatMoney(payout)}.`;
+        } else if (symbol.id === '🍀') {
+          payout = Math.round(payout * (1 + (state.perks.cloverRush ? 0.35 : 0)));
+          state.bigWins += 1;
+          message = `Lucky Clover! Triple clovers pay ${formatMoney(payout)}.`;
+        } else {
+          state.bigWins += 1;
+          message = `Triple ${symbol.id}! You win ${formatMoney(payout)}.`;
+        }
+        state.streak += 1;
+      } else if (Object.values(symbolCounts).includes(2)) {
+        const pairSymbol = symbolsOnly.find(symbol => symbolCounts[symbol] === 2);
+        const symbol = symbols.find(item => item.id === pairSymbol);
+        payout = Math.round(symbol.value * 0.45 * multiplier * skill);
+        message = `Nice pair: two ${symbol.id}! You gain ${formatMoney(payout)}.`;
+        state.streak += 1;
+      } else if (symbolCounts['7️⃣']) {
+        payout = Math.round(30 * multiplier);
+        message = `One lucky seven gets ${formatMoney(payout)} back.`;
+        state.streak = 0;
+      } else {
+        payout = 0;
+        const cashback = Math.round(calculateSpinCost() * getPayback());
+        if (cashback > 0) {
+          payout += cashback;
+          message = `No win, but cashback returns ${formatMoney(cashback)}.`;
+        } else {
+          message = 'Tough luck. The reels came up dry.';
+        }
+        state.streak = 0;
+      }
+
+      if (payout === 0 && state.perks.secondChance && state.freeSecondChance) {
+        state.freeSecondChance = false;
+        state.lastResult = 'Second Chance activated! You survived the losing spin.';
+        addLog(state.lastResult, 'positive');
+        state.streak = Math.max(0, state.streak - 1);
+        return state.runCash <= 0 ? 0 : 0;
+      }
+
+      if (payout > 0) {
+        state.lastResult = message;
+        addLog(message, 'positive');
+      } else {
+        state.lastResult = message;
+        addLog(message, 'negative');
+      }
+      return payout;
+    }
+
+    function handleCashOut() {
+      if (state.isSpinning) return;
+      if (state.runCash <= 0) {
+        addResult('No run cash to cash out. Restart the run for another shot.');
+        return;
+      }
+      const bonus = 1 + state.upgrades.wallet * 0.07;
+      const payout = Math.round(state.runCash * bonus);
+      const reward = Math.max(payout, 0);
+      state.bank += reward;
+      state.lastResult = `Cashed out ${formatMoney(reward)} into the bank.`;
+      addLog(state.lastResult, 'positive');
+      state.runCash = getStartingRunCash();
+      state.streak = 0;
+      state.freeSecondChance = true;
+      updateUI();
+      saveState();
+    }
+
+    function addLog(message, type = 'neutral') {
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`.trim();
+      entry.textContent = message;
+      logList.prepend(entry);
+      while (logList.children.length > 18) {
+        logList.removeChild(logList.lastChild);
+      }
+    }
+
+    function addResult(message) {
+      resultBanner.textContent = message;
+    }
+
+    function renderShop() {
+      upgradeList.innerHTML = '';
+      upgradeData.forEach((item) => {
+        const level = state.upgrades[item.id];
+        const cost = Math.round(item.baseCost * (1 + level * 0.4));
+        const disabled = state.bank < cost || level >= item.maxLevel;
+        const buttonLabel = level >= item.maxLevel ? 'MAX' : `Buy ${formatMoney(cost)}`;
+
+        const card = document.createElement('div');
+        card.className = 'shop-item';
+        card.innerHTML = `
+          <div class="shop-item-title">
+            <span>${item.name}</span>
+            <strong>Lv ${level}/${item.maxLevel}</strong>
+          </div>
+          <div class="shop-item-description">${item.description}</div>
+          <button class="buy-button" ${disabled ? 'disabled' : ''} data-upgrade="${item.id}">${buttonLabel}</button>
+        `;
+        upgradeList.appendChild(card);
+      });
+      upgradeList.querySelectorAll('[data-upgrade]').forEach(btn => {
+        btn.addEventListener('click', () => buyUpgrade(btn.dataset.upgrade));
+      });
+    }
+
+    function renderPerks() {
+      perkList.innerHTML = '';
+      perkData.forEach((item) => {
+        const purchased = state.perks[item.id];
+        const disabled = purchased || state.bank < item.cost;
+        const buttonLabel = purchased ? 'Owned' : `Buy ${formatMoney(item.cost)}`;
+
+        const card = document.createElement('div');
+        card.className = 'perk-item';
+        card.innerHTML = `
+          <div class="perk-item-title">
+            <span>${item.name}</span>
+            <strong>${purchased ? '✓' : ''}</strong>
+          </div>
+          <div class="perk-item-description">${item.description}</div>
+          <button class="buy-button" ${disabled ? 'disabled' : ''} data-perk="${item.id}">${buttonLabel}</button>
+        `;
+        perkList.appendChild(card);
+      });
+      perkList.querySelectorAll('[data-perk]').forEach(btn => {
+        btn.addEventListener('click', () => buyPerk(btn.dataset.perk));
+      });
+    }
+
+    function buyUpgrade(id) {
+      const item = upgradeData.find(upgrade => upgrade.id === id);
+      if (!item) return;
+      const level = state.upgrades[id];
+      if (level >= item.maxLevel) return;
+      const cost = Math.round(item.baseCost * (1 + level * 0.4));
+      if (state.bank < cost) {
+        addResult('Not enough bank to upgrade that machine part.');
+        return;
+      }
+      state.bank -= cost;
+      state.upgrades[id] += 1;
+      addLog(`${item.name} upgraded to level ${state.upgrades[id]}.`, 'positive');
+      state.lastResult = `${item.name} upgraded!`;
+      updateUI();
+      renderShop();
+      saveState();
+    }
+
+    function buyPerk(id) {
+      const perk = perkData.find(item => item.id === id);
+      if (!perk || state.perks[id]) return;
+      if (state.bank < perk.cost) {
+        addResult('You need more bank money to buy that perk.');
+        return;
+      }
+      state.bank -= perk.cost;
+      state.perks[id] = true;
+      addLog(`${perk.name} purchased.`, 'positive');
+      state.lastResult = `Purchased ${perk.name}.`;
+      updateUI();
+      renderPerks();
+      saveState();
+    }
+
+    function updateUI() {
+      runBalanceEl.textContent = formatMoney(state.runCash);
+      headerBankEl.textContent = `Bank ${formatMoney(state.bank)}`;
+      spinCostEl.textContent = formatMoney(calculateSpinCost());
+      multiplierEl.textContent = `x${getMultiplier()}`;
+      streakEl.textContent = state.streak;
+      spinCountEl.textContent = state.spinCount;
+      bigWinsEl.textContent = state.bigWins;
+      jackpotBoostEl.textContent = `${getJackpotBoost()}%`;
+      cashbackValueEl.textContent = `${Math.round(getPayback() * 100)}%`;
+      resultBanner.textContent = state.lastResult;
+      cashoutButton.disabled = state.isSpinning || state.runCash <= 0;
+      spinButton.disabled = state.isSpinning;
+    }
+
+    function showGameOver() {
+      gameOverModal.classList.add('visible');
+      addLog('Run ended. Use your bank to buy upgrades and restart strong.', 'negative');
+    }
+
+    function hideGameOver() {
+      gameOverModal.classList.remove('visible');
+    }
+  </script>
+</body>
+</html>
