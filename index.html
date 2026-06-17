@@ -235,6 +235,24 @@
       box-shadow: 0 0 30px var(--accent-2);
     }
 
+    .game-card.slot {
+      border-color: var(--accent-4);
+      background: radial-gradient(circle at top left, rgba(167, 139, 250, 0.15), transparent 45%), var(--bg-light-secondary);
+    }
+
+    .game-card.slot:hover {
+      box-shadow: 0 16px 40px var(--accent-4), 0 0 30px rgba(167, 139, 250, 0.35);
+      opacity: 0.98;
+    }
+
+    .game-card.slot .game-header {
+      background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+    }
+
+    .dark-mode .game-card.slot {
+      background: radial-gradient(circle at top left, rgba(167, 139, 250, 0.3), transparent 45%), var(--bg-dark-secondary);
+    }
+
     .game-header {
       height: 140px;
       background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-5) 100%);
@@ -604,6 +622,21 @@
           <a href="characters.html" class="play-btn" id="charactersPlayBtn">Play Now 🚀</a>
         </div>
       </div>
+
+      <!-- Rogue Slot Machine Card -->
+      <div class="game-card slot">
+        <div class="game-header">🍀</div>
+        <div class="game-body">
+          <h2 class="game-title">Clover Pit</h2>
+          <p class="game-description">Spin a rogue-like slot machine, collect banked winnings, buy machine upgrades, unlock perks, and chase higher jackpots.</p>
+          <div class="game-stats">
+            <div class="visit-counter">
+              👀 <span class="visit-count" id="slotVisits">0</span>
+            </div>
+          </div>
+          <a href="slot.html" class="play-btn" id="slotPlayBtn">Play Now 🚀</a>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -677,11 +710,24 @@
       document.getElementById('charactersVisits').textContent = visits.toLocaleString();
     }
 
+    function loadSlotVisits() {
+      const visits = parseInt(localStorage.getItem('slotGlobalVisits') || '0');
+      document.getElementById('slotVisits').textContent = visits.toLocaleString();
+    }
+
+    function incrementSlotVisits() {
+      let visits = parseInt(localStorage.getItem('slotGlobalVisits') || '0');
+      visits++;
+      localStorage.setItem('slotGlobalVisits', visits.toString());
+      document.getElementById('slotVisits').textContent = visits.toLocaleString();
+    }
+
     // Initialize
     loadTheme();
     loadBengptVisits();
     loadPhysicsVisits();
     loadCharactersVisits();
+    loadSlotVisits();
 
     // Handle Ben GPT button click
     const bengptPlayBtn = document.getElementById('bengptPlayBtn');
@@ -701,6 +747,13 @@
     const charactersPlayBtn = document.getElementById('charactersPlayBtn');
     charactersPlayBtn.addEventListener('click', (e) => {
       incrementCharactersVisits();
+      // Navigation happens automatically since it's an <a> tag
+    });
+
+    // Handle Slot Machine button click
+    const slotPlayBtn = document.getElementById('slotPlayBtn');
+    slotPlayBtn.addEventListener('click', (e) => {
+      incrementSlotVisits();
       // Navigation happens automatically since it's an <a> tag
     });
 
